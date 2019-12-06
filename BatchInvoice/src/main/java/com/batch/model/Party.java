@@ -2,7 +2,7 @@ package com.batch.model;
 
 import javax.xml.bind.annotation.XmlElement;
 
-class Party{
+public class Party{
 	PartyIdentification partyIdentification;
 	
     @XmlElement(name="PartyIdentification",namespace = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")

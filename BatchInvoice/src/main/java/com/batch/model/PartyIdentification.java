@@ -2,7 +2,7 @@ package com.batch.model;
 
 import javax.xml.bind.annotation.XmlElement;
 
-class PartyIdentification{
+public class PartyIdentification{
 	public String getID() {
 		return ID;
 	}

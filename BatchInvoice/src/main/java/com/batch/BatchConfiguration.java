@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 
 
@@ -104,10 +105,11 @@ public class BatchConfiguration {
 	}
 	
 	@Bean
-	public JdbcBatchItemWriter<InvoiceDTO> writer(DataSource dataSource){
-		return new  JdbcBatchItemWriterBuilder<InvoiceDTO>()
-				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<InvoiceDTO>())
-				.sql("INSERT INTO invoice(invoice_id,issue_date,issue_time) values (:ID,:issueDate,:issueTime)")
+	public JdbcBatchItemWriter<Invoice> writer(DataSource dataSource){
+		return new  JdbcBatchItemWriterBuilder<Invoice>()
+				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Invoice>())
+				.sql("INSERT INTO invoice(custom_serie,issue_date,issue_time,number_serie,ta,pa,lea) "
+						+ "values (:customSerie,:issueDate,:issueTime,:numberSerie,:taxAmount,:payableAmount,:lineExtensionAmount)")
 				.dataSource(dataSource)
 				.build();
 				
@@ -126,9 +128,9 @@ public class BatchConfiguration {
 	
 	@Bean
 	
-	public Step step1(JdbcBatchItemWriter<InvoiceDTO> writer) {
+	public Step step1(JdbcBatchItemWriter<Invoice> writer) {
 		return stepBuilderFactory.get("step1")
-				.<InvoiceDTO,InvoiceDTO>chunk(10)
+				.<InvoiceDTO,Invoice>chunk(10)
 				.reader(reader())
 				.processor(processor())
 				.writer(writer)

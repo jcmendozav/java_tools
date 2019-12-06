@@ -117,8 +117,12 @@ public class InvoiceDTO {
 
 	@Override
 	public String toString() {
-		return "Invoice [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
-				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode 
+		return "Invoice ["
+				+ "ID=" + ID 
+				+ ", issueDate=" + issueDate 
+				+ ", issueTime=" + issueTime 
+				+ ", invoiceTypeCode="+ invoiceTypeCode 
+				+ ", documentCurrencyCode=" + documentCurrencyCode 
 				+ ", accountingSupplierParty="+ accountingSupplierParty 
 				+ ", ruc="+ accountingSupplierParty.getParty().getPartyIdentification().getID()
 				+ ", igv="+ taxTotal.getTaxAmount()
@@ -128,9 +132,7 @@ public class InvoiceDTO {
 	}
 
 
-	
 
-	
 
 
 	}

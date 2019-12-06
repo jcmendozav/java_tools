@@ -43,7 +43,8 @@ public class BatchConfiguration {
     @Bean
     ItemReader<Invoice> reader()  {
         StaxEventItemReader<Invoice> xmlFileReader = new StaxEventItemReader<>();
-	    xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
+	    xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
+	    //xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
         xmlFileReader.setFragmentRootElementName("Invoice");
  
         Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();

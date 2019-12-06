@@ -4,16 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
-import com.batch.model.Invoice;
+import com.batch.model.InvoiceDTO;
 
-public class InvoiceItemProcessor implements ItemProcessor<Invoice, Invoice>
+public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, InvoiceDTO>
 {
 
 	
 	private static final Logger log = LoggerFactory.getLogger(InvoiceItemProcessor.class);
 
 	@Override
-	public Invoice process(Invoice invoice) throws Exception {
+	public InvoiceDTO process(InvoiceDTO invoice) throws Exception {
 		// TODO Auto-generated method stub
 //		String firstName = person.getFirstName().toUpperCase();
 //		String lastName = person.getLastName().toUpperCase();

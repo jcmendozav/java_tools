@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="Invoice",namespace="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2")
 //@XmlRootElement(name="Invoice")
 
-public class Invoice {
+public class InvoiceDTO {
 
 	
 	public String getID() {
@@ -34,7 +34,7 @@ public class Invoice {
 	}
 
 	
-	public Invoice() {
+	public InvoiceDTO() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -79,7 +79,7 @@ public class Invoice {
 		return taxTotal;
 	}
     
-    public Invoice(String ID,String issueDate,String issueTime, String documentCurrencyCode, String invoiceTypeCode) {
+    public InvoiceDTO(String ID,String issueDate,String issueTime, String documentCurrencyCode, String invoiceTypeCode) {
 		this.ID=ID;
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;
@@ -88,7 +88,7 @@ public class Invoice {
 
 	}
 	
-	public Invoice(String ID,String issueDate,String issueTime) {
+	public InvoiceDTO(String ID,String issueDate,String issueTime) {
 		this.ID=ID;
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;

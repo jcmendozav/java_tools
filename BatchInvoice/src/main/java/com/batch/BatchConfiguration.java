@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
-import com.batch.model.Invoice;
+import com.batch.model.InvoiceDTO;
 
 
 @Configuration
@@ -43,14 +43,14 @@ public class BatchConfiguration {
 
 	//@StepScope
     @Bean
-    ItemReader<Invoice> reader()  {
-        StaxEventItemReader<Invoice> xmlFileReader = new StaxEventItemReader<>();
+    ItemReader<InvoiceDTO> reader()  {
+        StaxEventItemReader<InvoiceDTO> xmlFileReader = new StaxEventItemReader<>();
 	    xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
 	    //xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
         xmlFileReader.setFragmentRootElementName("Invoice");
  
         Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();
-        invoiceMarshaller.setClassesToBeBound(Invoice.class);
+        invoiceMarshaller.setClassesToBeBound(InvoiceDTO.class);
         xmlFileReader.setUnmarshaller(invoiceMarshaller);
 //        xmlFileReader.open(new ExecutionContext());
 //
@@ -84,14 +84,14 @@ public class BatchConfiguration {
     }
     
     @Bean
-    ItemReader<Invoice> reader2() {
-        StaxEventItemReader<Invoice> xmlFileReader = new StaxEventItemReader<>();
+    ItemReader<InvoiceDTO> reader2() {
+        StaxEventItemReader<InvoiceDTO> xmlFileReader = new StaxEventItemReader<>();
 	    //xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
 	    xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
         xmlFileReader.setFragmentRootElementName("Invoice");
  
         Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();
-        invoiceMarshaller.setClassesToBeBound(Invoice.class);
+        invoiceMarshaller.setClassesToBeBound(InvoiceDTO.class);
         xmlFileReader.setUnmarshaller(invoiceMarshaller);
  
         return xmlFileReader;
@@ -104,9 +104,9 @@ public class BatchConfiguration {
 	}
 	
 	@Bean
-	public JdbcBatchItemWriter<Invoice> writer(DataSource dataSource){
-		return new  JdbcBatchItemWriterBuilder<Invoice>()
-				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Invoice>())
+	public JdbcBatchItemWriter<InvoiceDTO> writer(DataSource dataSource){
+		return new  JdbcBatchItemWriterBuilder<InvoiceDTO>()
+				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<InvoiceDTO>())
 				.sql("INSERT INTO invoice(invoice_id,issue_date,issue_time) values (:ID,:issueDate,:issueTime)")
 				.dataSource(dataSource)
 				.build();
@@ -126,9 +126,9 @@ public class BatchConfiguration {
 	
 	@Bean
 	
-	public Step step1(JdbcBatchItemWriter<Invoice> writer) {
+	public Step step1(JdbcBatchItemWriter<InvoiceDTO> writer) {
 		return stepBuilderFactory.get("step1")
-				.<Invoice,Invoice>chunk(10)
+				.<InvoiceDTO,InvoiceDTO>chunk(10)
 				.reader(reader())
 				.processor(processor())
 				.writer(writer)

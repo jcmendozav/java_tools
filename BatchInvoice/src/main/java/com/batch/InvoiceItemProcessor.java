@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
+import com.batch.model.Invoice;
+
 public class InvoiceItemProcessor implements ItemProcessor<Invoice, Invoice>
 {
 

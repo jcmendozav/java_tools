@@ -1,4 +1,4 @@
-package com.batch;
+package com.batch.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,12 +53,39 @@ public class Invoice {
 		this.documentCurrencyCode = documentCurrencyCode;
 	}
 	
-	public Invoice(String ID,String issueDate,String issueTime, String documentCurrencyCode, String invoiceTypeCode) {
+	public void setAccountingSupplierParty(AccountingSupplierParty accountingSupplierParty) {
+		this.accountingSupplierParty = accountingSupplierParty;
+	}
+	
+    @XmlElement(name="AccountingSupplierParty",namespace = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")
+	public AccountingSupplierParty getAccountingSupplierParty() {
+		return accountingSupplierParty;
+	}
+    
+    @XmlElement(name="LegalMonetaryTotal",namespace = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")
+    public void setLegalMonetaryTotal(LegalMonetaryTotal legalMonetaryTotal) {
+		this.legalMonetaryTotal = legalMonetaryTotal;
+	}
+    public LegalMonetaryTotal getLegalMonetaryTotal() {
+		return legalMonetaryTotal;
+	}
+    
+    @XmlElement(name="TaxTotal",namespace = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")
+    public void setTaxTotal(TaxTotal taxTotal) {
+		this.taxTotal = taxTotal;
+	}
+    
+    public TaxTotal getTaxTotal() {
+		return taxTotal;
+	}
+    
+    public Invoice(String ID,String issueDate,String issueTime, String documentCurrencyCode, String invoiceTypeCode) {
 		this.ID=ID;
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;
 		this.documentCurrencyCode=documentCurrencyCode;
 		this.invoiceTypeCode=invoiceTypeCode;
+
 	}
 	
 	public Invoice(String ID,String issueDate,String issueTime) {
@@ -66,6 +93,8 @@ public class Invoice {
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;
 	}
+	
+
 	
     private String ID;
     
@@ -78,13 +107,30 @@ public class Invoice {
 	private String invoiceTypeCode;
     
     private String documentCurrencyCode;
+    
+    private AccountingSupplierParty accountingSupplierParty;
+
+    private LegalMonetaryTotal legalMonetaryTotal;
+    
+    private TaxTotal taxTotal;
+
 
 	@Override
 	public String toString() {
 		return "Invoice [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
-				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode + "]";
+				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode 
+				+ ", accountingSupplierParty="+ accountingSupplierParty 
+				+ ", ruc="+ accountingSupplierParty.getParty().getPartyIdentification().getID()
+				+ ", igv="+ taxTotal.getTaxAmount()
+				+ ", subtotal="+ legalMonetaryTotal.getLineExtensionAmount()
+				+ ", total="+ legalMonetaryTotal.getPayableAmount()
+				+ "]";
 	}
 
+
+	
+
+	
 
 
 	}

@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.batch.model.Invoice;
+
 @Component
 public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
 	
@@ -29,7 +31,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			jdbcTemplate
 			.query("SELECT invoice_id, issue_date,issue_time FROM invoice", 
 					(rs,row) -> new Invoice(rs.getString(1),rs.getString(2),rs.getString(3)) )
-			.forEach(invoice -> log.info("Found <" + invoice + "> in the database."));
+			.forEach(invoice -> log.info("Found <" + invoice.getID() + "> in the database."));
 		}
 
 	}

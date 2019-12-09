@@ -1,4 +1,4 @@
-package com.batch;
+package com.batch.config;
 
 import javax.sql.DataSource;
 
@@ -17,15 +17,21 @@ import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 
+import com.batch.listener.JobCompletionNotificationListener;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
+import com.batch.procesor.InvoiceItemProcessor;
+import com.batch.tasklet.FileCopyTasklet;
 
 
 @Configuration
@@ -41,12 +47,30 @@ public class BatchConfiguration {
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
 
+	//@Value("file:D:\\Users\\jcmendozav\\Documentos\\Ericsson\\Dev\\Contabilidad\\input\\*.xml")
+	@Value("file:///D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/input/*.xml")
+	private Resource[] inputResources;
 
+	@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/backup")
+	private String backupPath;
+	
+	@Value(".bu")
+	private String backupExt;
+
+	@Bean
+	public MultiResourceItemReader<InvoiceDTO> multiResourceItemReader() 
+	{
+	    MultiResourceItemReader<InvoiceDTO> resourceItemReader = new MultiResourceItemReader<InvoiceDTO>();
+	    resourceItemReader.setResources(inputResources);
+	    resourceItemReader.setDelegate(reader());
+	    return resourceItemReader;
+	}
+	
 	//@StepScope
     @Bean
-    ItemReader<InvoiceDTO> reader()  {
+    StaxEventItemReader<InvoiceDTO> reader()  {
         StaxEventItemReader<InvoiceDTO> xmlFileReader = new StaxEventItemReader<>();
-	    xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
+	    //xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
 	    //xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
         xmlFileReader.setFragmentRootElementName("Invoice");
  
@@ -116,25 +140,39 @@ public class BatchConfiguration {
 	}
 	
 	@Bean
-	public Job importUserJob(JobCompletionNotificationListener listener, Step step1) {
-		return jobBuilderFactory.get("ImportUserJob")
+	public Job ImportInvoiceJob(JobCompletionNotificationListener listener, Step stepUploadFile) {
+		return jobBuilderFactory.get("ImportInvoiceJob")
 				.incrementer(new RunIdIncrementer())
 				.listener(listener)
-				.flow(step1)
-				.end()
+				.start(stepBackUp())
+				.next(stepUploadFile)
 				.build();
 				
 	}
 	
 	@Bean
 	
-	public Step step1(JdbcBatchItemWriter<Invoice> writer) {
-		return stepBuilderFactory.get("step1")
+	public Step stepUploadFile(JdbcBatchItemWriter<Invoice> writer) {
+		return stepBuilderFactory.get("stepUploadFile")
 				.<InvoiceDTO,Invoice>chunk(10)
-				.reader(reader())
+				.reader(multiResourceItemReader())
 				.processor(processor())
 				.writer(writer)
 				.build();
 		
 	}
+	
+    @Bean
+    public Step stepBackUp() {
+        FileCopyTasklet task = new FileCopyTasklet();
+        task.setExt(backupExt);
+        task.setNewPath(backupPath);
+        task.setResources(inputResources);
+        return stepBuilderFactory.get("stepBackUp")
+                .tasklet(task)
+                .build();
+    }
+    
+    
+    
 }

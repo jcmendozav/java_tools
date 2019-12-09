@@ -31,5 +31,6 @@ CREATE TABLE invoice  (
 	lea NUMERIC (10, 4),
 	ta NUMERIC (10, 4),
 	pa NUMERIC (10, 4),
+	status numeric default 0, 
     creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

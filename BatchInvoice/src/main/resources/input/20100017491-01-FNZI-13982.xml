@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Invoice
+	xmlns:ns13="urn:sunat:names:specification:ubl:peru:schema:xsd:Retention-1"
+	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+	xmlns:ns6="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+	xmlns:ns7="urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2"
+	xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDatatypes-2"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+	xmlns:ns11="urn:sunat:names:specification:ubl:peru:schema:xsd:VoidedDocuments-1"
+	xmlns:ns10="urn:sunat:names:specification:ubl:peru:schema:xsd:SummaryDocuments-1"
+	xmlns:ns12="urn:oasis:names:specification:ubl:schema:xsd:DespatchAdvice-2"
+	xmlns:sac="urn:sunat:names:specification:ubl:peru:schema:xsd:SunatAggregateComponents-1"
+	xmlns:ns14="urn:sunat:names:specification:ubl:peru:schema:xsd:Perception-1"
+	xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+	xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+	xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+	<ext:UBLExtensions>
+		<ext:UBLExtension>
+			<cbc:ID>Firma</cbc:ID>
+			<ext:ExtensionContent>
+				<Signature Id="signTelefonicaPeru"
+					xmlns="http://www.w3.org/2000/09/xmldsig#">
+					<SignedInfo>
+						<CanonicalizationMethod
+							Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+						<SignatureMethod
+							Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+						<Reference URI="">
+							<Transforms>
+								<Transform
+									Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+							</Transforms>
+							<DigestMethod
+								Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+							<DigestValue>eHdVKiUurrcXzP4Llw5mP1MiDl8=</DigestValue>
+						</Reference>
+					</SignedInfo>
+					<SignatureValue>hZhScHEyKXTFsq3cW1gdZPBhlBkifL0N+aWjjoBKBVvmx5bsgX12Idi5r+/i7UMp3ooyvc2fZGNY25Ibz1EZCc47ogOKdGO/zLKMyQK85GT/EvNp8yhujKenNJUAlCG213x7Q70eoBAS66GEQ736XtNgO6z+N0EmaRBj54xhGSLwua3AI3KcToD6zU940oE0f0gez6Hjwjjl2Jn6z21MxkoLJzGJM4puav2eGrXXkbzqZu3Yo1AWrgAu5QtYJ4A7qCSQbKghDh9zABxIPI7c+xFNsweHY9Xe52O/bIHYiwL/XmzzwT0U8PCTIBkcCCdRJtk2zVf8NKCbyWISXQQfJQ==</SignatureValue>
+					<KeyInfo>
+						<X509Data>
+							<X509Certificate>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</X509Certificate>
+						</X509Data>
+						<KeyValue>
+							<RSAKeyValue>
+								<Modulus>5/6lG6YN9OSkYJ37IJrLeG8mGWAXB0O/VMttvLNhKaSDUNKvNCcYldlM9ZOvanc9WPML5sR/aanVHwGYeoULHxBBks4J9oQ/+WF+pb6Y5yxptdGzGhboTscjO4ia1uTxWQw2wLimN400pZgz7bvRzqyQlLlw4C3LU0l/GO3ywY2Gc0R+K6z0KWhYgGbfwCNVuEnbxrr0049+rxL1hCDu+DTfcbzSV3Sb81bErpxMHRMzvEnAuHB5l2eorc6lz/apmkXSqbiVPqSuRgA+lmqKdx1IGY+TzKcn/2NVG2HhNBcoGNpwm7bK6Dto1XN/IPAT9iNWBjBhMRG0/gAxnKjo6w==</Modulus>
+								<Exponent>AQAB</Exponent>
+							</RSAKeyValue>
+						</KeyValue>
+					</KeyInfo>
+				</Signature>
+			</ext:ExtensionContent>
+		</ext:UBLExtension>
+	</ext:UBLExtensions>
+	<cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+	<cbc:CustomizationID>2.0</cbc:CustomizationID>
+	<cbc:ID>FNZI-00023980</cbc:ID>
+	<ID>JAMPI-NNNNNNNNN</ID>
+	<cbc:IssueDate>2019-11-23</cbc:IssueDate>
+	<cbc:IssueTime>10:29:22.00</cbc:IssueTime>
+	<cbc:InvoiceTypeCode listID="0101">01</cbc:InvoiceTypeCode>
+	<cbc:Note languageLocaleID="1000"><![CDATA[QUINIENTOS VEINTITRES Y 00/100 SOLES]]></cbc:Note>
+	<cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
+	<cac:Signature>
+		<cbc:ID>IDSignKG</cbc:ID>
+		<cac:SignatoryParty>
+			<cac:PartyIdentification>
+				<cbc:ID>20100017491</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name><![CDATA[TELEFONICA DEL PERU SAA]]></cbc:Name>
+			</cac:PartyName>
+		</cac:SignatoryParty>
+		<cac:DigitalSignatureAttachment>
+			<cac:ExternalReference>
+				<cbc:URI>#signatureKG</cbc:URI>
+			</cac:ExternalReference>
+		</cac:DigitalSignatureAttachment>
+	</cac:Signature>
+	<cac:AccountingSupplierParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="6">20100017491</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyName>
+				<cbc:Name><![CDATA[TELEFONICA DEL PERU SAA]]></cbc:Name>
+			</cac:PartyName>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName><![CDATA[TELEFONICA DEL PERU SAA]]></cbc:RegistrationName>
+				<cac:RegistrationAddress>
+					<cbc:ID>150122</cbc:ID>
+					<cbc:AddressTypeCode>0955</cbc:AddressTypeCode>
+					<cbc:CitySubdivisionName><![CDATA[-]]></cbc:CitySubdivisionName>
+					<cbc:CityName><![CDATA[LIMA]]></cbc:CityName>
+					<cbc:CountrySubentity><![CDATA[LIMA]]></cbc:CountrySubentity>
+					<cbc:District><![CDATA[SAN ISIDRO]]></cbc:District>
+					<cac:AddressLine>
+						<cbc:Line><![CDATA[Cal.Dean Valdivia Nro. 148 Dpto. 201 Urb. Jardin (Centro Empresarial Platinum Plaza Torre1)]]></cbc:Line>
+					</cac:AddressLine>
+					<cac:Country>
+						<cbc:IdentificationCode>PE</cbc:IdentificationCode>
+					</cac:Country>
+				</cac:RegistrationAddress>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingSupplierParty>
+	<cac:AccountingCustomerParty>
+		<cac:Party>
+			<cac:PartyIdentification>
+				<cbc:ID schemeID="6">20100963834</cbc:ID>
+			</cac:PartyIdentification>
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName><![CDATA[CIA ERICSSON S.A.]]></cbc:RegistrationName>
+				<cac:RegistrationAddress>
+					<cbc:ID>150131</cbc:ID>
+					<cbc:CitySubdivisionName><![CDATA[-]]></cbc:CitySubdivisionName>
+					<cbc:CityName><![CDATA[LIMA]]></cbc:CityName>
+					<cbc:CountrySubentity><![CDATA[LIMA]]></cbc:CountrySubentity>
+					<cbc:District><![CDATA[SAN ISIDRO]]></cbc:District>
+					<cac:AddressLine>
+						<cbc:Line><![CDATA[JR JUAN DE ARONA Nro. 151 Dpto. / Int. 603 UR, JARDIN ]]></cbc:Line>
+					</cac:AddressLine>
+					<cac:Country>
+						<cbc:IdentificationCode>PE</cbc:IdentificationCode>
+					</cac:Country>
+				</cac:RegistrationAddress>
+			</cac:PartyLegalEntity>
+		</cac:Party>
+	</cac:AccountingCustomerParty>
+	<cac:TaxTotal>
+		<cbc:TaxAmount currencyID="PEN">79.78</cbc:TaxAmount>
+		<cac:TaxSubtotal>
+			<cbc:TaxableAmount currencyID="PEN">443.22</cbc:TaxableAmount>
+			<cbc:TaxAmount currencyID="PEN">79.78</cbc:TaxAmount>
+			<cac:TaxCategory>
+				<cac:TaxScheme>
+					<cbc:ID>1000</cbc:ID>
+					<cbc:Name><![CDATA[IGV]]></cbc:Name>
+					<cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+				</cac:TaxScheme>
+			</cac:TaxCategory>
+		</cac:TaxSubtotal>
+	</cac:TaxTotal>
+	<cac:LegalMonetaryTotal>
+		<cbc:LineExtensionAmount currencyID="PEN">443.22</cbc:LineExtensionAmount>
+		<cbc:TaxInclusiveAmount currencyID="PEN">523.00</cbc:TaxInclusiveAmount>
+		<cbc:AllowanceTotalAmount currencyID="PEN">0.00</cbc:AllowanceTotalAmount>
+		<cbc:PayableAmount currencyID="PEN">523.00</cbc:PayableAmount>
+	</cac:LegalMonetaryTotal>
+	<cac:InvoiceLine>
+		<cbc:ID>1</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="NIU">1.0000000000</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="PEN">0.85</cbc:LineExtensionAmount>
+		<cac:PricingReference>
+			<cac:AlternativeConditionPrice>
+				<cbc:PriceAmount currencyID="PEN">1.0000000000</cbc:PriceAmount>
+				<cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+			</cac:AlternativeConditionPrice>
+		</cac:PricingReference>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="PEN">0.15</cbc:TaxAmount>
+			<cac:TaxSubtotal>
+				<cbc:TaxableAmount currencyID="PEN">0.85</cbc:TaxableAmount>
+				<cbc:TaxAmount currencyID="PEN">0.15</cbc:TaxAmount>
+				<cac:TaxCategory>
+					<cbc:Percent>18.00</cbc:Percent>
+					<cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+					<cac:TaxScheme>
+						<cbc:ID>1000</cbc:ID>
+						<cbc:Name><![CDATA[IGV]]></cbc:Name>
+						<cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+					</cac:TaxScheme>
+				</cac:TaxCategory>
+			</cac:TaxSubtotal>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Description><![CDATA[Simcard/ICCID:8951063021923891655/SAP:null/Servicio:997576262]]></cbc:Description>
+			<cac:SellersItemIdentification>
+				<cbc:ID>OC1_PrecioChip</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:CommodityClassification>
+				<cbc:ItemClassificationCode>43190000</cbc:ItemClassificationCode>
+			</cac:CommodityClassification>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="PEN">0.8500000000</cbc:PriceAmount>
+		</cac:Price>
+	</cac:InvoiceLine>
+	<cac:InvoiceLine>
+		<cbc:ID>2</cbc:ID>
+		<cbc:InvoicedQuantity unitCode="NIU">1.0000000000</cbc:InvoicedQuantity>
+		<cbc:LineExtensionAmount currencyID="PEN">442.37</cbc:LineExtensionAmount>
+		<cac:PricingReference>
+			<cac:AlternativeConditionPrice>
+				<cbc:PriceAmount currencyID="PEN">522.0000000000</cbc:PriceAmount>
+				<cbc:PriceTypeCode>01</cbc:PriceTypeCode>
+			</cac:AlternativeConditionPrice>
+		</cac:PricingReference>
+		<cac:TaxTotal>
+			<cbc:TaxAmount currencyID="PEN">79.63</cbc:TaxAmount>
+			<cac:TaxSubtotal>
+				<cbc:TaxableAmount currencyID="PEN">442.37</cbc:TaxableAmount>
+				<cbc:TaxAmount currencyID="PEN">79.63</cbc:TaxAmount>
+				<cac:TaxCategory>
+					<cbc:Percent>18.00</cbc:Percent>
+					<cbc:TaxExemptionReasonCode>10</cbc:TaxExemptionReasonCode>
+					<cac:TaxScheme>
+						<cbc:ID>1000</cbc:ID>
+						<cbc:Name><![CDATA[IGV]]></cbc:Name>
+						<cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+					</cac:TaxScheme>
+				</cac:TaxCategory>
+			</cac:TaxSubtotal>
+		</cac:TaxTotal>
+		<cac:Item>
+			<cbc:Description><![CDATA[Equipo/IMEI:359310103867479/SAP:null/Servicio:997576262]]></cbc:Description>
+			<cac:SellersItemIdentification>
+				<cbc:ID>OC8_PrecioEquip</cbc:ID>
+			</cac:SellersItemIdentification>
+			<cac:CommodityClassification>
+				<cbc:ItemClassificationCode>43190000</cbc:ItemClassificationCode>
+			</cac:CommodityClassification>
+		</cac:Item>
+		<cac:Price>
+			<cbc:PriceAmount currencyID="PEN">442.3700000000</cbc:PriceAmount>
+		</cac:Price>
+	</cac:InvoiceLine>
+</Invoice>

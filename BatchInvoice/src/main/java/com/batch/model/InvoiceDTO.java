@@ -94,24 +94,13 @@ public class InvoiceDTO {
 		this.issueTime=issueTime;
 	}
 	
-
-	
     private String ID;
-    
     private String issueDate;
-    
     private String issueTime;
-    
-
-
 	private String invoiceTypeCode;
-    
     private String documentCurrencyCode;
-    
     private AccountingSupplierParty accountingSupplierParty;
-
     private LegalMonetaryTotal legalMonetaryTotal;
-    
     private TaxTotal taxTotal;
 
 

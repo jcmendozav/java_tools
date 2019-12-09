@@ -3,7 +3,7 @@ package com.batch.model;
 import java.util.Date;
 import java.util.Set;
 
-public class Invoice {
+public class InvoiceExpDTO {
 	
 	public String getPartyId() {
 		return partyId;

@@ -56,6 +56,9 @@ public class BatchConfiguration {
 	
 	@Value(".bu")
 	private String backupExt;
+	
+	@Value("yyyyMMdd_HHmmss")
+	private String dateFormat;
 
 	@Bean
 	public MultiResourceItemReader<InvoiceDTO> multiResourceItemReader() 
@@ -132,28 +135,55 @@ public class BatchConfiguration {
 	public JdbcBatchItemWriter<Invoice> writer(DataSource dataSource){
 		return new  JdbcBatchItemWriterBuilder<Invoice>()
 				.itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<Invoice>())
-				.sql("INSERT INTO invoice(custom_serie,issue_date,issue_time,number_serie,ta,pa,lea) "
-						+ "values (:customSerie,:issueDate,:issueTime,:numberSerie,:taxAmount,:payableAmount,:lineExtensionAmount)")
+				.sql("INSERT INTO invoice"
+						+ "("
+						+ "custom_serie"
+						+ ",issue_date"
+						+ ",issue_time"
+						+ ",number_serie"
+						+ ",ta"
+						+ ",pa"
+						+ ",lea"
+						+ ",party_id"
+						+ ",tax_code,"
+						+ ",invoice_type_code,"
+						+ "doc_date"
+						+ ") "
+						+ "values "
+						+ "("
+						+ ":customSerie"
+						+ ",:issueDate"
+						+ ",:issueTime"
+						+ ",:numberSerie"
+						+ ",:taxAmount"
+						+ ",:payableAmount"
+						+ ",:lineExtensionAmount"
+						+ ",:partyId"
+						+ ",:taxCode"
+						+ ",:invoiceTypeCode"
+						+ ",:docDate"
+						+ ")")
+				
 				.dataSource(dataSource)
 				.build();
 				
 	}
 	
 	@Bean
-	public Job ImportInvoiceJob(JobCompletionNotificationListener listener, Step stepUploadFile) {
+	public Job ImportInvoiceJob(JobCompletionNotificationListener listener, Step uploadFileStep) {
 		return jobBuilderFactory.get("ImportInvoiceJob")
 				.incrementer(new RunIdIncrementer())
 				.listener(listener)
-				.start(stepBackUp())
-				.next(stepUploadFile)
+				.start(backUpStep())
+				.next(uploadFileStep)
 				.build();
 				
 	}
 	
 	@Bean
 	
-	public Step stepUploadFile(JdbcBatchItemWriter<Invoice> writer) {
-		return stepBuilderFactory.get("stepUploadFile")
+	public Step uploadFileStep(JdbcBatchItemWriter<Invoice> writer) {
+		return stepBuilderFactory.get("uploadFileStep")
 				.<InvoiceDTO,Invoice>chunk(10)
 				.reader(multiResourceItemReader())
 				.processor(processor())
@@ -163,12 +193,13 @@ public class BatchConfiguration {
 	}
 	
     @Bean
-    public Step stepBackUp() {
+    public Step backUpStep() {
         FileCopyTasklet task = new FileCopyTasklet();
         task.setExt(backupExt);
         task.setNewPath(backupPath);
         task.setResources(inputResources);
-        return stepBuilderFactory.get("stepBackUp")
+        task.setDateFormat(dateFormat);
+        return stepBuilderFactory.get("backUpStep")
                 .tasklet(task)
                 .build();
     }

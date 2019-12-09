@@ -44,6 +44,8 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
 	}
 
 	private String ext;
+
+	private String dateFormat;
 	
 
  
@@ -52,7 +54,7 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
         for(Resource r: resources) {
         	
             File file = r.getFile();
-            String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
             String newFileName=file.getName()+"_"+timeStamp+ext;
             log.debug("Copyng:"+file.getPath());
             System.out.println("Copyng:"+file.getPath());
@@ -74,4 +76,10 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(resources, "directory must be set");
     }
+
+	public void setDateFormat(String dateFormat) {
+		// TODO Auto-generated method stub
+		this.dateFormat=dateFormat;
+		
+	}
 }

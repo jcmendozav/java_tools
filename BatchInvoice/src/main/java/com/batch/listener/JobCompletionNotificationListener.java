@@ -29,8 +29,8 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			
 			log.info("!!! JOB FINISHED");
 			jdbcTemplate
-			.query("SELECT invoice_id, issue_date,issue_time FROM invoice", 
-					(rs,row) -> new InvoiceDTO(rs.getString(1),rs.getString(2),rs.getString(3)) )
+			.query("SELECT ID, issue_date,issue_time FROM invoice", 
+					(rs,row) -> new InvoiceDTO(rs.getString("ID"),rs.getString(2),rs.getString(3)) )
 			.forEach(invoice -> log.info("Found <" + invoice.getID() + "> in the database."));
 		}
 

@@ -13,6 +13,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -27,15 +28,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.batch.model.Invoice;
-import com.batch.model.InvoiceDTO;
 import com.batch.procesor.InvoiceItemExportProcessor;
 
 @Configuration
 @EnableBatchProcessing
-public class exportInvoice {
+public class ExportInvoice {
 
 	
-	private static final Logger log = LoggerFactory.getLogger(exportInvoice.class);
+	private static final Logger log = LoggerFactory.getLogger(ExportInvoice.class);
 
 	
 	 @Autowired
@@ -49,6 +49,9 @@ public class exportInvoice {
 	
 	@Value(".ext")
 	private String exportExt;
+	
+	@Value("yyyyMMdd_HHmmss")
+	private String dateFormat;
 	
 	@Autowired
 	DataSource dataSource;
@@ -66,7 +69,7 @@ public class exportInvoice {
 	 public JdbcCursorItemReader<Invoice> expInvoiceReader(){
 	  JdbcCursorItemReader<Invoice> reader = new JdbcCursorItemReader<Invoice>();
 	  reader.setDataSource(dataSource);
-	  reader.setSql("SELECT currency_code,number_serie,custom_serie,lea,ta,pa,currency_code FROM invoice");
+	  reader.setSql("SELECT ID,currency_code,number_serie,custom_serie,lea,ta,pa,currency_code FROM invoice");
 	  reader.setRowMapper(new InvoiceRowMapper());
 	  
 	  return reader;
@@ -78,11 +81,10 @@ public class exportInvoice {
 	}
 	
 	@Bean
-	
 	public FlatFileItemWriter<Invoice> expInvoiceWriter(){
 		
 		FlatFileItemWriter<Invoice> fileItemWriter = new FlatFileItemWriter<Invoice>();
-        String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
         String newFileName=exportPath+"/"+"invoices"+"_"+timeStamp+".csv";
         Resource res = new FileSystemResource(newFileName);
         try {
@@ -106,9 +108,9 @@ public class exportInvoice {
 	}
 	
 	@Bean
-	public Step step1() {
+	public Step stepExportInvoiceStep() {
 		return stepBuilderFactory
-				.get("step1")
+				.get("stepExportInvoiceStep")
 				.<Invoice,Invoice> chunk(2)
 				.reader(expInvoiceReader())
 				.processor(expInvoiceProc())
@@ -119,9 +121,10 @@ public class exportInvoice {
 	@Bean
 	public Job exportInvoiceJob() {
 		
-		return jobBuilderFactory.get("exportInvoiceJob")
-				.flow(step1())
-				.end()
+		return jobBuilderFactory.get("ExportInvoiceJob")
+				.incrementer(new RunIdIncrementer())
+				.start(stepExportInvoiceStep())
+				//.end()
 				.build();
 		
 	}

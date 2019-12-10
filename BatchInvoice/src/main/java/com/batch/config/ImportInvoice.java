@@ -9,11 +9,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ParseException;
-import org.springframework.batch.item.UnexpectedInputException;
+import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
@@ -31,15 +29,16 @@ import com.batch.listener.JobCompletionNotificationListener;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 import com.batch.procesor.InvoiceItemProcessor;
+import com.batch.skipPolicy.ImportInvoiceSkipPolicy;
 import com.batch.tasklet.FileCopyTasklet;
 
 
 @Configuration
 @EnableBatchProcessing
-public class BatchConfiguration {
+public class ImportInvoice {
 	
 	
-	private static final Logger log = LoggerFactory.getLogger(BatchConfiguration.class);
+	private static final Logger log = LoggerFactory.getLogger(ImportInvoice.class);
 
 	
 	@Autowired
@@ -59,6 +58,8 @@ public class BatchConfiguration {
 	
 	@Value("yyyyMMdd_HHmmss")
 	private String dateFormat;
+	
+	
 
 	@Bean
 	public MultiResourceItemReader<InvoiceDTO> multiResourceItemReader() 
@@ -66,69 +67,38 @@ public class BatchConfiguration {
 	    MultiResourceItemReader<InvoiceDTO> resourceItemReader = new MultiResourceItemReader<InvoiceDTO>();
 	    resourceItemReader.setResources(inputResources);
 	    resourceItemReader.setDelegate(reader());
+	    resourceItemReader.getCurrentResource();
 	    return resourceItemReader;
+	    
 	}
 	
 	//@StepScope
     @Bean
     StaxEventItemReader<InvoiceDTO> reader()  {
         StaxEventItemReader<InvoiceDTO> xmlFileReader = new StaxEventItemReader<>();
-	    //xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
-	    //xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
         xmlFileReader.setFragmentRootElementName("Invoice");
- 
         Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();
         invoiceMarshaller.setClassesToBeBound(InvoiceDTO.class);
         xmlFileReader.setUnmarshaller(invoiceMarshaller);
-//        xmlFileReader.open(new ExecutionContext());
-//
-//
-//			boolean hasNext = true;
-//			
-//			Invoice trade = null;
-//			
-//			while (hasNext) {
-//			    try {
-//					trade = xmlFileReader.read();
-//				} catch (UnexpectedInputException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} catch (ParseException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			    if (trade == null) {
-//			        hasNext = false;
-//			    }
-//			    else {
-//			        log.info("invoice->"+trade);
-//			    }
-//			}
- 
+
         return xmlFileReader;
     }
     
-    @Bean
-    ItemReader<InvoiceDTO> reader2() {
-        StaxEventItemReader<InvoiceDTO> xmlFileReader = new StaxEventItemReader<>();
-	    //xmlFileReader.setResource(new ClassPathResource("20100017491-01-FNZI-00013980.xml"));
-	    xmlFileReader.setResource(new ClassPathResource("invoice_list.xml"));
-        xmlFileReader.setFragmentRootElementName("Invoice");
- 
-        Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();
-        invoiceMarshaller.setClassesToBeBound(InvoiceDTO.class);
-        xmlFileReader.setUnmarshaller(invoiceMarshaller);
- 
-        return xmlFileReader;
-    }
 
 
 	@Bean
-	public InvoiceItemProcessor processor() {
-		return new InvoiceItemProcessor();
+	@StepScope
+	public InvoiceItemProcessor processor(@Value("#{stepExecutionContext['fileName']}") String file,
+			@Value("#{stepExecution.jobExecution.id}") Long jobID) {
+		
+
+		InvoiceItemProcessor invoiceItemProcessor = new InvoiceItemProcessor();
+		invoiceItemProcessor.setResources(inputResources);
+		System.out.println("----processor----fileName--->" + file);
+		System.out.println("----processor----jobID--->" + jobID);
+		invoiceItemProcessor.setProcessingFileName(file);
+		//invoiceItemProcessor.setProcessingJobid(jobID);
+		return invoiceItemProcessor;
 	}
 	
 	@Bean
@@ -145,9 +115,10 @@ public class BatchConfiguration {
 						+ ",pa"
 						+ ",lea"
 						+ ",party_id"
-						+ ",tax_code,"
-						+ ",invoice_type_code,"
-						+ "doc_date"
+						+ ",tax_code"
+						+ ",invoice_type_code"
+						+ ",doc_date"
+						+ ",job_execution_id"
 						+ ") "
 						+ "values "
 						+ "("
@@ -162,6 +133,7 @@ public class BatchConfiguration {
 						+ ",:taxCode"
 						+ ",:invoiceTypeCode"
 						+ ",:docDate"
+						+ ",:jobExecutionID"
 						+ ")")
 				
 				.dataSource(dataSource)
@@ -170,27 +142,37 @@ public class BatchConfiguration {
 	}
 	
 	@Bean
-	public Job ImportInvoiceJob(JobCompletionNotificationListener listener, Step uploadFileStep) {
+	public SkipPolicy fileVerificationSkipper() {
+	    return new ImportInvoiceSkipPolicy();
+	}
+	
+	@Bean
+	public Job ImportInvoiceJob(JobCompletionNotificationListener listener, Step uploadFileContentStep) {
 		return jobBuilderFactory.get("ImportInvoiceJob")
 				.incrementer(new RunIdIncrementer())
 				.listener(listener)
 				.start(backUpStep())
-				.next(uploadFileStep)
+				.next(uploadFileContentStep)
 				.build();
 				
 	}
 	
 	@Bean
 	
-	public Step uploadFileStep(JdbcBatchItemWriter<Invoice> writer) {
-		return stepBuilderFactory.get("uploadFileStep")
+	public Step uploadFileContentStep(JdbcBatchItemWriter<Invoice> writer) {
+		return stepBuilderFactory.get("uploadFileContentStep")
 				.<InvoiceDTO,Invoice>chunk(10)
 				.reader(multiResourceItemReader())
-				.processor(processor())
+				.processor(processor(null, null))
 				.writer(writer)
+				.faultTolerant()
+				.skipPolicy(fileVerificationSkipper())
 				.build();
 		
 	}
+	
+	
+	
 	
     @Bean
     public Step backUpStep() {

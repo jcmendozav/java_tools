@@ -56,8 +56,8 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
             File file = r.getFile();
             String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
             String newFileName=file.getName()+"_"+timeStamp+ext;
-            log.debug("Copyng:"+file.getPath());
-            System.out.println("Copyng:"+file.getPath());
+            log.debug("Copying:"+file.getPath());
+            System.out.println("Copying:"+file.getPath());
             if(Files.copy(file.toPath()
             		, (new File(newPath+"/"+newFileName).toPath())
             		, StandardCopyOption.REPLACE_EXISTING

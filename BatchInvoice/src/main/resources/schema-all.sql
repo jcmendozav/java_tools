@@ -14,6 +14,25 @@ CREATE TABLE people  (
 
 psql -h localhost -p 5432 -U batchuser -d batch
 
+
+CREATE SEQUENCE invoice_file_id_seq;
+
+
+DROP TABLE  IF EXISTS invoice_file;
+
+CREATE TABLE invoice_file  (
+    ID integer NOT NULL DEFAULT nextval('invoice_file_id_seq') PRIMARY KEY,
+    file_name VARCHAR(128),
+    file_path VARCHAR(128),
+    resource_str VARCHAR(256),
+    row_num numeric,
+	status numeric,
+	status_desc VARCHAR(512),
+	job_execution_id numeric,
+	last_update_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE SEQUENCE invoice_id_seq;
 
 
@@ -39,7 +58,10 @@ CREATE TABLE invoice  (
 );
 
 ALTER TABLE invoice ADD COLUMN tax_code VARCHAR(8);
+ALTER TABLE invoice ADD COLUMN invoice_type_code VARCHAR(8);
 ALTER TABLE invoice ADD COLUMN doc_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE invoice ADD COLUMN inv_file_id numeric;
+ALTER TABLE invoice ADD COLUMN job_execution_id numeric;
 
 select 
 custom_serie,issue_date,issue_time,number_serie,ta,pa,lea,party_id
@@ -73,7 +95,7 @@ CREATE TABLE post_key_conf  (
 );
 
 COPY post_key_conf(Amnt_local_Type,doc_type_code,post_key) 
-FROM 'C:\tmp\post_key_conf.txt' DELIMITER ',' CSV HEADER;
+FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/post_key_conf.txt' DELIMITER ',' CSV HEADER;
 
 vendor_map
 party_id,vendor_id
@@ -90,10 +112,15 @@ CREATE TABLE vendor_map  (
     party_id VARCHAR(16),
     vendor_id VARCHAR(16),
     creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unq_post_conf UNIQUE(party_id,vendor_id)
+    CONSTRAINT unq_vendor_map UNIQUE(party_id,vendor_id)
     
 
 );
+
+
+
+COPY vendor_map(party_id,vendor_id) 
+FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/vendor_map.txt' DELIMITER ',' CSV HEADER;
 
 
 account_mapping
@@ -120,3 +147,53 @@ FROM invoice
 where 1=1
 and creationdate>=current_Date
 ORDER BY 1, 2 ;  
+
+
+
+
+
+
+
+
+select vm.vendor_id
+,pkc.post_key
+,iv.Doc_Date 
+,iv.Posting_Date 
+,iv.Period 
+,iv.ref_no 
+,iv.doc_hdr_txt 
+,iv.Account 
+,iv.Amnt_Doc_Curr 
+,iv.Amnt_local_Type 
+FROM (
+ SELECT ROW_NUMBER() OVER (ORDER BY ID) AS group,  
+unnest(array[ID, ID, ID]) AS ID,  
+unnest(array[issue_date, issue_date, issue_date]) AS Doc_Date,  
+unnest(array[current_Date, current_Date, current_Date]) AS Posting_Date,  
+unnest(array[date_part('month', doc_date), date_part('month', doc_date), date_part('month', doc_date)]) AS Period,  
+unnest(array[number_serie, number_serie, number_serie]) AS ref_no,  
+unnest(array[custom_serie, custom_serie, custom_serie]) AS doc_hdr_txt,  
+unnest(array['TBD', 'TBD','TBD']) AS Account,  
+unnest(array[issue_date, issue_date, issue_date]) AS Base_Date,  
+--unnest(array['TBD', 'TBD','TBD']) AS CCntr,  
+--unnest(array['TBD', 'TBD','TBD']) AS Assign_no,  
+--unnest(array['TBD', 'TBD','TBD']) AS itm_txt,  
+unnest(array[party_id, party_id,party_id]) AS party_id,  
+unnest(array[invoice_type_code, invoice_type_code,invoice_type_code]) AS invoice_type_code,
+unnest(array[ta, lea,pa ]) AS Amnt_Doc_Curr,
+unnest(array['igv', 'sub-total','total']) AS Amnt_local_Type  
+ from invoice
+ where 1=1
+ and creationdate>=current_Date
+ ) as iv
+ , vendor_map as vm
+ , post_key_conf as pkc
+where 1=1
+and iv.party_id = vm.party_id
+and iv.Amnt_local_Type=pkc.Amnt_local_Type
+and iv.invoice_type_code=pkc.doc_type_code
+ORDER BY 1, 2 ;  
+
+
+
+

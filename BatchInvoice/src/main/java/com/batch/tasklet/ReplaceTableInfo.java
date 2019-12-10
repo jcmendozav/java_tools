@@ -36,8 +36,7 @@ public class ReplaceTableInfo implements Tasklet, InitializingBean{
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 		// TODO Auto-generated method stub
 		
-	      pgConnection = dataSource.getConnection().unwrap(PGConnection.class);
-	      copyManager = pgConnection.getCopyAPI();
+
 	 		
 		return RepeatStatus.FINISHED;
 	}

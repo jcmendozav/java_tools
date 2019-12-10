@@ -121,6 +121,7 @@ public class ExportInvoice {
 	@Bean
 	public Job exportInvoiceJob() {
 		
+		
 		return jobBuilderFactory.get("ExportInvoiceJob")
 				.incrementer(new RunIdIncrementer())
 				.start(stepExportInvoiceStep())

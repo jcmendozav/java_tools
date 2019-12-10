@@ -99,6 +99,21 @@ public class Invoice {
 		return invoiceTypeCode;
 	}
 	
+	public void setJobExecutionID(Long long1) {
+		this.jobExecutionID = long1;
+	}
+	public Long getJobExecutionID() {
+		return jobExecutionID;
+	}
+	
+	public void setInvFileID(Long invFileID) {
+		this.invFileID = invFileID;
+	}
+	
+	public Long getInvFileID() {
+		return invFileID;
+	}
+	
 	String partyId;
 	String vendorId;
 	String customSerie;
@@ -113,5 +128,7 @@ public class Invoice {
 	String taxCode;
 	String invoiceTypeCode;
 	private Date docDate;
+	Long jobExecutionID;
+	Long invFileID;
 
 }

@@ -1,0 +1,7 @@
+Amnt_local_Type,doc_type_code,post_key
+sub-total,01,30
+igv,01,30
+total,01,41
+sub-total,07,50
+igv,07,50
+total,07,21

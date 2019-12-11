@@ -18,11 +18,11 @@ import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 
 @Configuration
-public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, Invoice>
+public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Invoice>
 {
 
 	
-	private static final Logger log = LoggerFactory.getLogger(InvoiceItemProcessor.class);
+	private static final Logger log = LoggerFactory.getLogger(InvoiceItemImportProcessor.class);
 
 	
 	@Value("I2")
@@ -33,7 +33,6 @@ public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, Invoice>
 	
 	private Resource[] resources;
 	
-	private StepExecution stepExecution;
 
 
 	private String currentFile;
@@ -41,6 +40,8 @@ public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, Invoice>
 	public void setResources(Resource[] resources) {
 		this.resources = resources;
 	}
+
+	private StepExecution stepExecution;
 
 	@BeforeStep
 	public void saveStepExecution(StepExecution stepExecution) {
@@ -56,11 +57,19 @@ public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, Invoice>
 		// TODO Auto-generated method stub
 
 		ExecutionContext executionContext = stepExecution.getExecutionContext();
-		int resourceIndex = executionContext.getInt("MultiResourceItemReader.resourceIndex");
-
-		System.out.println(" coming from resource = " + currentFile+",resourceIndex:"+resourceIndex+",no_resources:"+resources.length+", processing item = " + invoiceDTO.toString() );
-
-		//log.info("Converting  (" + invoiceDTO.toString() + ")");
+		int fileProcCount=executionContext.getInt("fileProcCounter");
+		String fileID=executionContext.getString("UUID");
+//		System.out.println(
+//				"File Info from process: "
+//						+ ",fileName:"+executionContext.getString("fileName")+""
+//						+ ",UUID:"+executionContext.getString("UUID")+""
+//						+ ",fileProcCounter:"+executionContext.getInt("fileProcCounter")+""
+//						//+ ",filePath:"+executionContext.getString("filePath")+""
+//						+ ",fileLength:"+executionContext.getLong("fileLength")+""
+//						+ ",fileLines:"+executionContext.getLong("fileLines")+""
+//						+ ",no_resources:"+resources.length+""
+//				//+ ", processing item = " + invoiceDTO.toString() 
+//				);
 		
 		if(
 			invoiceDTO.getID()==null 
@@ -91,6 +100,8 @@ public class InvoiceItemProcessor implements ItemProcessor<InvoiceDTO, Invoice>
 		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SS");  
 		Date docDate = formatter.parse(invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime());
 		invoice.setDocDate(docDate);
+		invoice.setInvFileID(fileID);
+		executionContext.put("fileProcCounter",fileProcCount+1);
 		return invoice;
 	}
 

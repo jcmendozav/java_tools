@@ -1,5 +1,7 @@
 package com.batch.listener;
 
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -16,11 +18,11 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 	
 	private static final Logger log = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
 
-	private final JdbcTemplate jdbcTemplate;
+	private JdbcTemplate jdbcTemplate;
 
   @Autowired
-  public JobCompletionNotificationListener(JdbcTemplate jdbcTemplate) {
-    this.jdbcTemplate = jdbcTemplate;
+  public JobCompletionNotificationListener() {
+    //this.jdbcTemplate = jdbcTemplate;
   }
 	@Override
 	public void afterJob(JobExecution jobExecution) {
@@ -33,6 +35,11 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 					(rs,row) -> new InvoiceDTO(rs.getString("ID"),rs.getString(2),rs.getString(3)) )
 			.forEach(invoice -> log.info("Found <" + invoice.getID() + "> in the database."));
 		}
+
+	}
+	public void setDataSource(DataSource dataSource) {
+		// TODO Auto-generated method stub
+	    this.jdbcTemplate = new JdbcTemplate(dataSource);
 
 	}
 

@@ -106,12 +106,27 @@ public class Invoice {
 		return jobExecutionID;
 	}
 	
-	public void setInvFileID(Long invFileID) {
+	public void setInvFileID(String invFileID) {
 		this.invFileID = invFileID;
 	}
 	
-	public Long getInvFileID() {
+	public String getInvFileID() {
 		return invFileID;
+	}
+	
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
+	public String getFileName() {
+		return fileName;
+	}
+	
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+	public String getFilePath() {
+		return filePath;
 	}
 	
 	String partyId;
@@ -129,6 +144,8 @@ public class Invoice {
 	String invoiceTypeCode;
 	private Date docDate;
 	Long jobExecutionID;
-	Long invFileID;
+	String invFileID;
+	String fileName;
+	String filePath;
 
 }

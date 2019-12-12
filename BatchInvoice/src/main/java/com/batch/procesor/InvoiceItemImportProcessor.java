@@ -16,6 +16,7 @@ import org.springframework.core.io.Resource;
 import com.batch.exception.MissingMandadoryInvoiceFields;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
+import com.batch.model.InvoiceFile;
 
 @Configuration
 public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Invoice>
@@ -58,7 +59,15 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 
 		ExecutionContext executionContext = stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");
-		String fileID=executionContext.getString("UUID");
+		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
+		System.out.println("InvoiceFile from processor "
+				+ ",invoiceFile: "+invoiceFile+""
+				+ ",fileID: "+stepExecution.getExecutionContext().getInt("fileID")+""
+				+ ",jobID: "+stepExecution.getJobExecutionId()+""
+						+ "");
+		
+		//int fileID=executionContext.getInt("fileID");
+		//String uuid=executionContext.getString("uuid");
 //		System.out.println(
 //				"File Info from process: "
 //						+ ",fileName:"+executionContext.getString("fileName")+""
@@ -100,8 +109,9 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SS");  
 		Date docDate = formatter.parse(invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime());
 		invoice.setDocDate(docDate);
-		invoice.setInvFileID(fileID);
+		invoice.setFileID(invoiceFile.getID());
 		executionContext.put("fileProcCounter",fileProcCount+1);
+		
 		return invoice;
 	}
 

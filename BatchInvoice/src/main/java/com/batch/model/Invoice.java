@@ -106,12 +106,12 @@ public class Invoice {
 		return jobExecutionID;
 	}
 	
-	public void setInvFileID(String invFileID) {
-		this.invFileID = invFileID;
+	public void setFileID(int fileID) {
+		this.fileID = fileID;
 	}
 	
-	public String getInvFileID() {
-		return invFileID;
+	public int getFileID() {
+		return fileID;
 	}
 	
 	public void setFileName(String fileName) {
@@ -144,7 +144,7 @@ public class Invoice {
 	String invoiceTypeCode;
 	private Date docDate;
 	Long jobExecutionID;
-	String invFileID;
+	int fileID;
 	String fileName;
 	String filePath;
 

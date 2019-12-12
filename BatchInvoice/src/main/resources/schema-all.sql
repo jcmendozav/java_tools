@@ -15,23 +15,6 @@ CREATE TABLE people  (
 psql -h localhost -p 5432 -U batchuser -d batch
 
 
-CREATE SEQUENCE invoice_file_id_seq;
-
-
-DROP TABLE  IF EXISTS invoice_file;
-
-CREATE TABLE invoice_file  (
-    ID integer NOT NULL DEFAULT nextval('invoice_file_id_seq') PRIMARY KEY,
-    file_name VARCHAR(128),
-    file_path VARCHAR(128),
-    resource_str VARCHAR(256),
-    row_num numeric,
-	status numeric,
-	status_desc VARCHAR(512),
-	job_execution_id numeric,
-	last_update_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE SEQUENCE invoice_id_seq;
 
@@ -54,13 +37,17 @@ CREATE TABLE invoice  (
 	ta NUMERIC (10, 4),
 	pa NUMERIC (10, 4),
 	status numeric default 0, 
+	file_id numeric, 
+	job_execution_id numeric, 
+	invoice_type_code VARCHAR(8),
+	doc_date TIMESTAMP WITH TIME ZONE ,
+	last_update_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE invoice ADD COLUMN tax_code VARCHAR(8);
 ALTER TABLE invoice ADD COLUMN invoice_type_code VARCHAR(8);
 ALTER TABLE invoice ADD COLUMN doc_date TIMESTAMP WITH TIME ZONE;
-ALTER TABLE invoice ADD COLUMN inv_file_id numeric;
 ALTER TABLE invoice ADD COLUMN job_execution_id numeric;
 
 select 
@@ -126,28 +113,29 @@ FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/vendor_map.tx
 account_mapping
 
 
-SELECT ROW_NUMBER() OVER (ORDER BY ID) AS group,  
-unnest(array[ID, ID, ID]) AS ID,  
-unnest(array[issue_date, issue_date, issue_date]) AS Doc_Date,  
-unnest(array[current_Date, current_Date, current_Date]) AS Posting_Date,  
-unnest(array[date_part('month', doc_date), date_part('month', doc_date), date_part('month', doc_date)]) AS Period,  
-unnest(array[number_serie, number_serie, number_serie]) AS ref_no,  
-unnest(array[custom_serie, custom_serie, custom_serie]) AS doc_hdr_txt,  
-unnest(array[40, 40,31]) AS post_key,  
-unnest(array['TBD', 'TBD','TBD']) AS Account,  
-unnest(array[issue_date, issue_date, issue_date]) AS Base_Date,  
-unnest(array['TBD', 'TBD','TBD']) AS CCntr,  
-unnest(array['TBD', 'TBD','TBD']) AS Assign_no,  
-unnest(array['TBD', 'TBD','TBD']) AS itm_txt,  
-unnest(array[tax_code, tax_code,tax_code]) AS Tax_Code,
-unnest(array[ta, lea,pa ]) AS Amnt_Doc_Curr,
-unnest(array['igv', 'sub-total','total']) AS Amnt_local_Type
+CREATE SEQUENCE invoice_file_id_seq;
 
-FROM invoice  
-where 1=1
-and creationdate>=current_Date
-ORDER BY 1, 2 ;  
+DROP TABLE  IF EXISTS invoice_file_job;
 
+CREATE TABLE invoice_file_job  (
+    ID integer NOT NULL DEFAULT nextval('invoice_file_id_seq')  ,
+    file_name VARCHAR(128),
+    file_path VARCHAR(512),
+    uuid VARCHAR(128),
+    job_id VARCHAR(16),
+    lines numeric,
+    size numeric,
+    object_counter numeric DEFAULT 0,
+    status numeric DEFAULT 0,
+	status_desc VARCHAR(512),
+	last_update_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+     CONSTRAINT unq_invoice_file_job PRIMARY KEY (ID )
+    
+    --,
+    --CONSTRAINT unq_invoice_file_job UNIQUE(ID,uuid,job_id)
+);
 
 
 
@@ -165,9 +153,11 @@ select vm.vendor_id
 ,iv.Account 
 ,iv.Amnt_Doc_Curr 
 ,iv.Amnt_local_Type 
+,file_id
 FROM (
  SELECT ROW_NUMBER() OVER (ORDER BY ID) AS group,  
 unnest(array[ID, ID, ID]) AS ID,  
+unnest(array[file_id, file_id, file_id]) AS file_id,  
 unnest(array[issue_date, issue_date, issue_date]) AS Doc_Date,  
 unnest(array[current_Date, current_Date, current_Date]) AS Posting_Date,  
 unnest(array[date_part('month', doc_date), date_part('month', doc_date), date_part('month', doc_date)]) AS Period,  

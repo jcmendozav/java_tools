@@ -30,10 +30,10 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 		if(jobExecution.getStatus()==BatchStatus.COMPLETED) {
 			
 			log.info("!!! JOB FINISHED");
-			jdbcTemplate
-			.query("SELECT ID, issue_date,issue_time FROM invoice", 
-					(rs,row) -> new InvoiceDTO(rs.getString("ID"),rs.getString(2),rs.getString(3)) )
-			.forEach(invoice -> log.info("Found <" + invoice.getID() + "> in the database."));
+//			jdbcTemplate
+//			.query("SELECT ID, issue_date,issue_time FROM invoice", 
+//					(rs,row) -> new InvoiceDTO(rs.getString("ID"),rs.getString(2),rs.getString(3)) )
+//			.forEach(invoice -> log.info("Found <" + invoice.getID() + "> in the database."));
 		}
 
 	}

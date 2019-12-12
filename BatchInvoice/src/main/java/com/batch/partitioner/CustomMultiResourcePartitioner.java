@@ -37,10 +37,10 @@ public class CustomMultiResourcePartitioner implements Partitioner {
     
 	@Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        log.info("gridSize: "+gridSize);
         Map<String, ExecutionContext> map = new HashMap<>(gridSize);
         int i = 0, k = 1;
         String filePath,fileID,fileName;
-        Long fileLines,fileLength;
         for (Resource resource : resources) {
             ExecutionContext context = new ExecutionContext();
             Assert.state(resource.exists(), "Resource does not exist: "
@@ -50,16 +50,13 @@ public class CustomMultiResourcePartitioner implements Partitioner {
             try {
             	filePath= resource.getFile().getAbsolutePath();
             	fileID=UUID.randomUUID().toString();
-            	fileLength=resource.getFile().length();
-            	fileLines= Files.lines(resource.getFile().toPath()).count();
-            	
+
 				context.putString("filePath", filePath);
-				context.putString("fileName", fileName);
-				context.putLong("fileLength",fileLength );
-				context.putLong("fileLines",fileLines);				
+				context.putString("fileName", fileName);		
 				context.putString("UUID", fileID);				
 				context.putInt("fileProcCounter", 0);		
-				
+		        log.info("partitioner, filePath: "+context.getString("filePath"));
+
 				
 				
 			}

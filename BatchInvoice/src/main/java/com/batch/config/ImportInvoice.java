@@ -35,6 +35,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.batch.listener.InvoiceFileStepListener;
 import com.batch.listener.JobCompletionNotificationListener;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
@@ -82,7 +83,7 @@ public class ImportInvoice {
 	@Value("yyyyMMdd_HHmmss")
 	private String dateFormat;
 	
-	@Value("3")
+	@Value("10")
 	private int maxPoolSize;
 
 //	@Bean
@@ -202,6 +203,8 @@ public class ImportInvoice {
 	public Step uploadFileContentStep() {
 		
 		JdbcBatchItemWriter<Invoice> writer = new JdbcBatchItemWriter<Invoice>();
+		InvoiceFileStepListener listener = new InvoiceFileStepListener();
+		listener.setDataSource(dataSource);
 		return stepBuilderFactory.get("uploadFileContentStep")
 				.<InvoiceDTO,Invoice>chunk(2)
 				.reader(reader(null))
@@ -210,6 +213,7 @@ public class ImportInvoice {
 				.faultTolerant()
 				.skipPolicy(fileVerificationSkipper())
 				.allowStartIfComplete(true)
+				.listener(listener)
 				.build();
 		
 	}
@@ -299,8 +303,8 @@ public class ImportInvoice {
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setMaxPoolSize(maxPoolSize);
-        taskExecutor.setCorePoolSize(maxPoolSize);
-        taskExecutor.setQueueCapacity(maxPoolSize);
+        //taskExecutor.setCorePoolSize(maxPoolSize);
+        //taskExecutor.setQueueCapacity(maxPoolSize);
         taskExecutor.afterPropertiesSet();
         return taskExecutor;
     }

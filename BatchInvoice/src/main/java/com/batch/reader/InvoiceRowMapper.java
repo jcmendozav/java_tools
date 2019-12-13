@@ -1,4 +1,4 @@
-package com.batch.config;
+package com.batch.reader;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
+import com.batch.model.InvoiceExpDTO;
 
 public class InvoiceRowMapper implements RowMapper<Invoice> {
 
@@ -18,7 +19,7 @@ public class InvoiceRowMapper implements RowMapper<Invoice> {
 	@Override
 	public Invoice mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// TODO Auto-generated method stub
-		
+		// vendor_id | post_key |  doc_date  | posting_date | period |  ref_no  | doc_hdr_txt | account | amnt_doc_curr | amnt_local_type | file_id
 		log.debug("Found: rowNum:"+rowNum+",ID:"+rs.getString("ID"));
 		Invoice invoice = new Invoice();
 		

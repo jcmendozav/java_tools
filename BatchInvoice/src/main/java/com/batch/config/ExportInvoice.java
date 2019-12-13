@@ -28,10 +28,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.batch.model.Invoice;
+import com.batch.model.InvoiceExpDTO;
 import com.batch.procesor.InvoiceItemExportProcessor;
+import com.batch.reader.InvoiceExpRowMapper;
+import com.batch.reader.InvoiceRowMapper;
+import com.batch.writer.InvoiceItemExportWriter;
 
-@Configuration
-@EnableBatchProcessing
+//@Configuration
+//@EnableBatchProcessing
 public class ExportInvoice {
 
 	
@@ -45,13 +49,21 @@ public class ExportInvoice {
 	 public StepBuilderFactory stepBuilderFactory;
 	 
 	@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/output")
-	private String exportPath;
+	private String outputPath;
+	
+	@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/template/invoice_exp_template.xlsx")
+	private String fileTemplatePath;
 	
 	@Value(".ext")
 	private String exportExt;
+	@Value(",")
+	private String delimiter;
 	
 	@Value("yyyyMMdd_HHmmss")
 	private String dateFormat;
+	
+	@Value("1")
+	private int daysAgo;
 	
 	@Autowired
 	DataSource dataSource;
@@ -66,11 +78,64 @@ public class ExportInvoice {
 //	  return dataSource;
 //	 }
 	@Bean
-	 public JdbcCursorItemReader<Invoice> expInvoiceReader(){
-	  JdbcCursorItemReader<Invoice> reader = new JdbcCursorItemReader<Invoice>();
+	 public JdbcCursorItemReader<InvoiceExpDTO> expInvoiceReader(){
+	  JdbcCursorItemReader<InvoiceExpDTO> reader = new JdbcCursorItemReader<InvoiceExpDTO>();
 	  reader.setDataSource(dataSource);
-	  reader.setSql("SELECT ID,currency_code,number_serie,custom_serie,lea,ta,pa,currency_code FROM invoice");
-	  reader.setRowMapper(new InvoiceRowMapper());
+	  reader.setSql("select " +
+	  		"iv.id\r\n" + 
+	  		",'FB01' as tx_code\r\n" + 
+	  		",'2016' as comp_code\r\n" + 
+	  		",vm.vendor_id\r\n" + 
+	  		",iv.Doc_Date \r\n" + 
+	  		",iv.Posting_Date \r\n" + 
+	  		",iv.Period \r\n" + 
+	  		",'KU' as doc_type\r\n" + 
+	  		",iv.currency_code \r\n" + 
+	  		",iv.ref_no \r\n" + 
+	  		",iv.doc_hdr_txt \r\n" + 
+	  		",pkc.post_key\r\n" + 
+	  		",iv.Account \r\n" + 
+	  		",iv.Amnt_Doc_Curr \r\n" + 
+	  		",iv.Amnt_local_Type \r\n" + 
+	  		",'ZP07' as paym_trm \r\n" + 
+	  		",iv.Doc_Date as base_date\r\n" + 
+	  		",'CCntr' as ccntr\r\n" + 
+	  		",'Assign. No' as assign_no\r\n" + 
+	  		",'Itm txt' as itm_txt\r\n" + 
+	  		",iv.tax_code \r\n" + 
+	  		",file_id\r\n" + 
+	  		"FROM (\r\n" + 
+	  		" SELECT ROW_NUMBER() OVER (ORDER BY id) AS group,  \r\n" + 
+	  		"unnest(array[id, id, id]) AS id,  \r\n" + 
+	  		"unnest(array[currency_code, currency_code, currency_code]) AS currency_code,  \r\n" + 
+	  		"unnest(array[file_id, file_id, file_id]) AS file_id,  \r\n" + 
+	  		"unnest(array[tax_code, tax_code, tax_code]) AS tax_code,  \r\n" + 
+	  		"unnest(array[issue_date, issue_date, issue_date]) AS Doc_Date,  \r\n" + 
+	  		"unnest(array[current_Date, current_Date, current_Date]) AS Posting_Date,  \r\n" + 
+	  		"unnest(array[date_part('month', doc_date), date_part('month', doc_date), date_part('month', doc_date)]) AS Period,  \r\n" + 
+	  		"unnest(array[number_serie, number_serie, number_serie]) AS ref_no,  \r\n" + 
+	  		"unnest(array[custom_serie, custom_serie, custom_serie]) AS doc_hdr_txt,  \r\n" + 
+	  		"unnest(array['TBD', 'TBD','TBD']) AS Account,  \r\n" + 
+	  		"unnest(array[issue_date, issue_date, issue_date]) AS Base_Date,  \r\n" + 
+	  		"--unnest(array['TBD', 'TBD','TBD']) AS CCntr,  \r\n" + 
+	  		"--unnest(array['TBD', 'TBD','TBD']) AS Assign_no,  \r\n" + 
+	  		"--unnest(array['TBD', 'TBD','TBD']) AS itm_txt,  \r\n" + 
+	  		"unnest(array[party_id, party_id,party_id]) AS party_id,  \r\n" + 
+	  		"unnest(array[invoice_type_code, invoice_type_code,invoice_type_code]) AS invoice_type_code,\r\n" + 
+	  		"unnest(array[ta, lea,pa ]) AS Amnt_Doc_Curr,\r\n" + 
+	  		"unnest(array['igv', 'sub-total','total']) AS Amnt_local_Type  \r\n" + 
+	  		" from invoice\r\n" + 
+	  		" where 1=1\r\n" + 
+	  		" and creationdate>=current_Date -"+daysAgo+"\r\n" + 
+	  		" ) as iv\r\n" + 
+	  		" , vendor_map as vm\r\n" + 
+	  		" , post_key_conf as pkc\r\n" + 
+	  		"where 1=1\r\n" + 
+	  		"and iv.party_id = vm.party_id\r\n" + 
+	  		"and iv.Amnt_local_Type=pkc.Amnt_local_Type\r\n" + 
+	  		"and iv.invoice_type_code=pkc.doc_type_code\r\n" + 
+	  		"ORDER BY 1, 2 ;  ");
+	  reader.setRowMapper(new InvoiceExpRowMapper());
 	  
 	  return reader;
 	 }
@@ -80,53 +145,38 @@ public class ExportInvoice {
 		return new InvoiceItemExportProcessor();
 	}
 	
+	
 	@Bean
-	public FlatFileItemWriter<Invoice> expInvoiceWriter(){
-		
-		FlatFileItemWriter<Invoice> fileItemWriter = new FlatFileItemWriter<Invoice>();
-        String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
-        String newFileName=exportPath+"/"+"invoices"+"_"+timeStamp+".csv";
-        Resource res = new FileSystemResource(newFileName);
-        try {
-			res.getFile().createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		fileItemWriter.setResource( res );
-		fileItemWriter.setLineAggregator(new DelimitedLineAggregator<Invoice>() {
-			{
-				setDelimiter(",");
-				setFieldExtractor(new BeanWrapperFieldExtractor<Invoice>() {{
-					
-					setNames(new String[] {"customSerie","numberSerie","LineExtensionAmount","TaxAmount","PayableAmount"});
-				}});
-				
-			}
-		});
-		return fileItemWriter;
+	
+	public InvoiceItemExportWriter expInvoiceXLSWriter(){
+		InvoiceItemExportWriter writer = new InvoiceItemExportWriter();
+		writer.setDateFormat(dateFormat);
+		writer.setFileTemplatePath(fileTemplatePath);
+		writer.setOutputPath(outputPath);
+		return writer;
 	}
+	
 	
 	@Bean
 	public Step stepExportInvoiceStep() {
 		return stepBuilderFactory
 				.get("stepExportInvoiceStep")
-				.<Invoice,Invoice> chunk(2)
+				.<InvoiceExpDTO,InvoiceExpDTO> chunk(2)
 				.reader(expInvoiceReader())
 				.processor(expInvoiceProc())
-				.writer(expInvoiceWriter())
+				.writer(expInvoiceXLSWriter())
 				.build();
 	}
 	
-	@Bean
-	public Job exportInvoiceJob() {
-		
-		
-		return jobBuilderFactory.get("ExportInvoiceJob")
-				.incrementer(new RunIdIncrementer())
-				.start(stepExportInvoiceStep())
-				//.end()
-				.build();
-		
-	}
+//	@Bean
+//	public Job exportInvoiceJob() {
+//		
+//		
+//		return jobBuilderFactory.get("ExportInvoiceJob")
+//				.incrementer(new RunIdIncrementer())
+//				.start(stepExportInvoiceStep())
+//				//.end()
+//				.build();
+//		
+//	}
 }

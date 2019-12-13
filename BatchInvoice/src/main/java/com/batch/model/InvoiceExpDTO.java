@@ -98,7 +98,144 @@ public class InvoiceExpDTO {
 	public String getInvoiceTypeCode() {
 		return invoiceTypeCode;
 	}
+
+	public void setPostKey(String postKey) {
+		// TODO Auto-generated method stub
+		this.postKey=postKey;
+	}
 	
+	public String getPostKey() {
+		return postKey;
+	}
+	
+	public void setPostingDate(java.sql.Date date) {
+		// TODO Auto-generated method stub
+		this.postingDate=date;
+	}
+	public void setRefNo(String string) {
+		// TODO Auto-generated method stub
+		this.refNo=string;
+	}
+	public void setPeriod(String string) {
+		// TODO Auto-generated method stub
+		this.period=string;
+	}
+	public void setDocHdr(String string) {
+		this.docHdr=string;
+	}
+	public void setAccount(String string) {
+		this.account=string;
+	}
+	public void setAmntDocCurr(Double amntDocCurr) {
+		this.amntDocCurr=amntDocCurr;
+	}
+	public void setAmntLocalType(String amntLocalType) {
+		this.amntLocalType=amntLocalType;
+	}
+	public void setFileId(int fileId) {
+		this.fileId=fileId;
+	}
+	
+	
+
+	public Date getPostingDate() {
+		return postingDate;
+	}
+	public String getRefNo() {
+		return refNo;
+	}
+	public String getPeriod() {
+		return period;
+	}
+	public String getDocHdr() {
+		return docHdr;
+	}
+	public String getAccount() {
+		return account;
+	}
+	public Double getAmntDocCurr() {
+		return amntDocCurr;
+	}
+	public String getAmntLocalType() {
+		return amntLocalType;
+	}
+	public int getFileId() {
+		return fileId;
+	}
+
+	public Date getBaseDate() {
+		return baseDate;
+	}
+	public void setBaseDate(Date baseDate) {
+		this.baseDate = baseDate;
+	}
+	public String getTxCode() {
+		return txCode;
+	}
+	public void setTxCode(String txCode) {
+		this.txCode = txCode;
+	}
+	public String getCompCode() {
+		return compCode;
+	}
+	public void setCompCode(String compCode) {
+		this.compCode = compCode;
+	}
+	public String getDocType() {
+		return docType;
+	}
+	public void setDocType(String docType) {
+		this.docType = docType;
+	}
+	public String getPaymTrm() {
+		return paymTrm;
+	}
+	public void setPaymTrm(String paymTrm) {
+		this.paymTrm = paymTrm;
+	}
+	public String getCcntr() {
+		return ccntr;
+	}
+	public void setCcntr(String ccntr) {
+		this.ccntr = ccntr;
+	}
+
+	public String getAssignNo() {
+		return assignNo;
+	}
+	public void setAssignNo(String assignNo) {
+		this.assignNo = assignNo;
+	}
+	public String getItmTxt() {
+		return itmTxt;
+	}
+	public void setItmTxt(String itmTxt) {
+		this.itmTxt = itmTxt;
+	}
+
+
+	private Date baseDate;
+	private String postKey;
+	private String txCode;
+	private String compCode;
+	private String docType;
+	private String paymTrm;
+	private String ccntr;
+
+
+
+
+
+	private String assignNo;
+	private String itmTxt;
+	private Date postingDate;
+	private String refNo;
+	private String period;
+	private String docHdr;
+	private String account;
+	private Double amntDocCurr;
+	private String amntLocalType;
+	private int fileId;
 	String partyId;
 	String vendorId;
 	String customSerie;
@@ -113,5 +250,6 @@ public class InvoiceExpDTO {
 	String taxCode;
 	String invoiceTypeCode;
 	private Date docDate;
+
 
 }

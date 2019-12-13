@@ -30,14 +30,12 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
     }
 	@Override
 	public void write(List<? extends Invoice> items) throws Exception {
-		// TODO Auto-generated method stub
 		ExecutionContext executionContext = this.stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");
-		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
+		//InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
 		System.out.println(
 				"File Info from writer: "
 						+ ",fileName:"+executionContext.getString("fileName")+""
-						+ ",fileID:"+invoiceFile.getID()+""
 						+ ",fileProcCounter:"+fileProcCount+""
 						+ ",items:"+items.size()+""
 				//+ ", processing item = " + invoiceDTO.toString() 
@@ -60,6 +58,7 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 						+ ",doc_date"
 						+ ",job_execution_id"
 						+ ",file_id"
+						+ ",currency_code"
 						+ ") "
 						+ "values "
 						+ "("
@@ -76,6 +75,7 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 						+ ",:docDate"
 						+ ",:jobExecutionID"
 						+ ",:fileID"
+						+ ",:currencyCode"
 						+ ")"				
 				, batch);
 		System.out.println("updateCounts: "+updateCounts);

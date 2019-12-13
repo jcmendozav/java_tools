@@ -174,7 +174,7 @@ unnest(array[ta, lea,pa ]) AS Amnt_Doc_Curr,
 unnest(array['igv', 'sub-total','total']) AS Amnt_local_Type  
  from invoice
  where 1=1
- and creationdate>=current_Date
+ and creationdate>=current_Date-1
  ) as iv
  , vendor_map as vm
  , post_key_conf as pkc

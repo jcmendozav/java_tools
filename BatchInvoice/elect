@@ -1,0 +1,4 @@
+ id | tx_code | comp_code | vendor_id | doc_date | posting_date | period | doc_type | currency_code | ref_no | doc_hdr_txt | post_key | account | amnt_doc_curr | amnt_local_type | paym_trm | base_date | ccntr | assign_no | itm_txt | tax_code | file_id 
+----+---------+-----------+-----------+----------+--------------+--------+----------+---------------+--------+-------------+----------+---------+---------------+-----------------+----------+-----------+-------+-----------+---------+----------+---------
+(0 rows)
+

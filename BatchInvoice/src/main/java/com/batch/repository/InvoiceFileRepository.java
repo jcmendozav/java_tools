@@ -1,5 +1,9 @@
 package com.batch.repository;
 
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -12,6 +16,10 @@ import com.batch.model.InvoiceFile;
 
 @Repository
 public class InvoiceFileRepository {
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(InvoiceFileRepository.class);
+
 	
 	private final String INSERT_SQL = "INSERT INTO invoice_file_job"
 			+ "("
@@ -39,12 +47,14 @@ public class InvoiceFileRepository {
 
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	
+	private DataSource dataSource;	
 	public void setJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	
-	public InvoiceFileRepository(NamedParameterJdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public InvoiceFileRepository(DataSource dataSource) {
+		this.dataSource=dataSource;
+		this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 
 	public int create(InvoiceFile invoiceFile) {
@@ -58,7 +68,7 @@ public class InvoiceFileRepository {
 		.addValue("lines", invoiceFile.getLines())
 		.addValue("size", invoiceFile.getSize());
 		jdbcTemplate.update(INSERT_SQL, parameters, holder, new String[] { "id" });
-		System.out.println("holder.getKey(): "+holder.getKey());
+		log.debug("holder.getKey(): {} ",holder.getKey());
 		invoiceFile.setID(holder.getKey().intValue());
 		return holder.getKey().intValue();
 	}

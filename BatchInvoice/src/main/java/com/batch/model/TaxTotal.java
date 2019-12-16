@@ -14,6 +14,10 @@ public class TaxTotal {
 		return this.taxAmount;
 	}
 	Double taxAmount;
+	@Override
+	public String toString() {
+		return "TaxTotal [taxAmount=" + taxAmount + "]";
+	}
 	
 	
 }

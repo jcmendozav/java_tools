@@ -72,9 +72,18 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!-- 
+								<configuration>
+				<mainClass>org.springframework.batch.core.launch.support.CommandLineJobRunner</mainClass>
+				</configuration>
+				
+				 -->
+
 			</plugin>
+			
 		</plugins>
-		<finalName>BatchInvoice</finalName>
+		
+		<finalName>BatchInvoiceApp</finalName>
 	</build>
 
 </project>

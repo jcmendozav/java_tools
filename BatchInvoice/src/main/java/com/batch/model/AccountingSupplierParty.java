@@ -12,4 +12,10 @@ public class AccountingSupplierParty{
 	public Party getParty() {
 		return party;
 	}
+	@Override
+	public String toString() {
+		return "AccountingSupplierParty [party=" + party + "]";
+	}
+	
+	
 }

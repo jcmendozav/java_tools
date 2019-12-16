@@ -105,7 +105,12 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
 					fileTemplate.toPath()
 					, newFile.toPath()
 							) != null) {
-				System.out.println("Sucessfull copy of:"+fileTemplate.getAbsolutePath() +",to:"+newFile.getAbsolutePath());
+				log.info("Sucessfull "
+						+ "copy of:{}"
+						+ ",to:{}"
+						,fileTemplate.getAbsolutePath() 
+						,newFile.getAbsolutePath()
+						);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

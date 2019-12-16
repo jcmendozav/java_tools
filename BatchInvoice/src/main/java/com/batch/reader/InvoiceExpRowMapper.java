@@ -20,7 +20,11 @@ public class InvoiceExpRowMapper implements RowMapper<InvoiceExpDTO> {
 	public InvoiceExpDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
 		// TODO Auto-generated method stub
 		// vendor_id | post_key |  doc_date  | posting_date | period |  ref_no  | doc_hdr_txt | account | amnt_doc_curr | amnt_local_type | file_id
-		log.debug("Found: rowNum:"+rowNum+",id:"+rs.getString("id"));
+		log.debug("Found: "
+				+ "rowNum:{} "
+				+ ",id:{}"
+				,rowNum
+				,rs.getString("id"));
 		InvoiceExpDTO invoice = new InvoiceExpDTO();
 		
 		invoice.setTxCode(rs.getString("tx_code"));

@@ -4,6 +4,10 @@ import com.batch.model.InvoiceDTO;
 
 public class MissingMandadoryInvoiceFields extends Exception {
 	InvoiceDTO invoiceDTO;
+	
+	public InvoiceDTO getInvoiceDTO() {
+		return invoiceDTO;
+	}
 	public MissingMandadoryInvoiceFields(InvoiceDTO invoiceDTO) {
 		// TODO Auto-generated constructor stub
 		this.invoiceDTO=invoiceDTO;

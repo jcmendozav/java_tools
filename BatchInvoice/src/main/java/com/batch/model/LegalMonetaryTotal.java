@@ -40,5 +40,12 @@ public class LegalMonetaryTotal {
 	Double taxInclusiveAmount;
 	Double allowanceTotalAmount;
 	Double payableAmount;
+	@Override
+	public String toString() {
+		return "LegalMonetaryTotal [lineExtensionAmount=" + lineExtensionAmount + ", taxInclusiveAmount="
+				+ taxInclusiveAmount + ", allowanceTotalAmount=" + allowanceTotalAmount + ", payableAmount="
+				+ payableAmount + "]";
+	}
+	
 	
 }

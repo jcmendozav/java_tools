@@ -59,26 +59,17 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 
 		ExecutionContext executionContext = stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");
+		String filePath=executionContext.getString("filePath");
+		invoiceDTO.setFilePath(filePath);
 		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
-		System.out.println("InvoiceFile from processor "
-				+ ",invoiceFile: "+invoiceFile+""
-				+ ",fileID: "+stepExecution.getExecutionContext().getInt("fileID")+""
-				+ ",jobID: "+stepExecution.getJobExecutionId()+""
-						+ "");
-		
-		//int fileID=executionContext.getInt("fileID");
-		//String uuid=executionContext.getString("uuid");
-//		System.out.println(
-//				"File Info from process: "
-//						+ ",fileName:"+executionContext.getString("fileName")+""
-//						+ ",UUID:"+executionContext.getString("UUID")+""
-//						+ ",fileProcCounter:"+executionContext.getInt("fileProcCounter")+""
-//						//+ ",filePath:"+executionContext.getString("filePath")+""
-//						+ ",fileLength:"+executionContext.getLong("fileLength")+""
-//						+ ",fileLines:"+executionContext.getLong("fileLines")+""
-//						+ ",no_resources:"+resources.length+""
-//				//+ ", processing item = " + invoiceDTO.toString() 
-//				);
+		log.debug("InvoiceFile from processor "
+				+ ",invoiceFile: {}"
+				+ ",fileID: {}"
+				+ ",jobID: {}"
+				,invoiceFile
+				,stepExecution.getExecutionContext().getInt("fileID")
+				,stepExecution.getJobExecutionId()
+				);
 		
 		if(
 			invoiceDTO.getID()==null 

@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
@@ -22,6 +24,9 @@ import com.batch.model.InvoiceFile;
 import com.batch.repository.InvoiceFileRepository;
 
 public class InvoiceFileStepListener implements StepExecutionListener {
+
+	
+	private static final Logger log = LoggerFactory.getLogger(InvoiceFileStepListener.class);
 
 	DataSource dataSource;
 	NamedParameterJdbcTemplate jdbcTemplate;
@@ -38,7 +43,7 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new NamedParameterJdbcTemplate( dataSource);
 		//this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource);
-		this.repository=new InvoiceFileRepository(jdbcTemplate);
+		this.repository=new InvoiceFileRepository(dataSource);
 	}
 	
 	@Override
@@ -69,7 +74,7 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 			e.printStackTrace();
 		}
 
-		System.out.println("invoiceFile fileID: "+fileID);
+		log.debug("invoiceFile fileID: {}",fileID);
 	}
 
 

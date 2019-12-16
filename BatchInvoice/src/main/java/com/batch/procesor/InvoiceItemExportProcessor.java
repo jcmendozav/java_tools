@@ -17,7 +17,7 @@ public class InvoiceItemExportProcessor implements ItemProcessor<InvoiceExpDTO, 
 	@Override
 	public InvoiceExpDTO process(InvoiceExpDTO item) throws Exception {
 		// TODO Auto-generated method stub
-		log.debug("Found:"+item);
+		log.debug("Found:{}",item);
 		return item;
 	}
 

@@ -102,10 +102,10 @@ public class InvoiceDTO {
     private AccountingSupplierParty accountingSupplierParty;
     private LegalMonetaryTotal legalMonetaryTotal;
     private TaxTotal taxTotal;
+	private String filePath;
 
 
-	@Override
-	public String toString() {
+	public String toStringCustom() {
 		return "Invoice ["
 				+ "ID=" + ID 
 				+ ", issueDate=" + issueDate 
@@ -120,6 +120,24 @@ public class InvoiceDTO {
 				+ "]";
 	}
 
+
+	
+
+	@Override
+	public String toString() {
+		return "InvoiceDTO [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
+				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode + ", accountingSupplierParty="
+				+ accountingSupplierParty + ", legalMonetaryTotal=" + legalMonetaryTotal + ", taxTotal=" + taxTotal
+				+ ", filePath=" + filePath + "]";
+	}
+	public void setFilePath(String filePath) {
+		// TODO Auto-generated method stub
+		this.filePath=filePath;
+		
+	}
+
+	
+	
 
 
 

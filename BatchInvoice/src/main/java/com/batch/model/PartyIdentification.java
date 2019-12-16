@@ -13,4 +13,11 @@ public class PartyIdentification{
 	}
 
 	String ID;
+
+	@Override
+	public String toString() {
+		return "PartyIdentification [ID=" + ID + "]";
+	}
+	
+	
 }

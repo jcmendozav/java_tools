@@ -2,6 +2,7 @@ package com.batch.config;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Date;
 
 import javax.sql.DataSource;
 
@@ -29,12 +30,17 @@ import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -68,8 +74,8 @@ public class ImportInvoice {
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
 	
-	@Autowired
-	public DataSource dataSource;
+//	@Autowired
+//	public DataSource dataSource;
 
 	//@Value("file:D:\\Users\\jcmendozav\\Documentos\\Ericsson\\Dev\\Contabilidad\\input\\*.xml")
 	@Value("${batch.invoice.import.inputResources}")
@@ -109,6 +115,21 @@ public class ImportInvoice {
 
 	@Value("${batch.invoice.export.chunk}")
 	private int exportChunk;
+	
+	@Bean
+	@Primary
+	@ConfigurationProperties("spring.datasource")
+	public DataSourceProperties firstDataSourceProperties() {
+	    return new DataSourceProperties();
+	}
+
+	@Bean
+	@Primary
+	@ConfigurationProperties("app.datasource.first")
+	public DataSource dataSource() {
+	    return firstDataSourceProperties().initializeDataSourceBuilder().build();
+	}
+
 	
     @Bean
     @StepScope
@@ -156,7 +177,7 @@ public class ImportInvoice {
 			@Value("#{stepExecutionContext['fileName']}") String fileName
 			,@Value("#{stepExecution.jobExecution.id}") Long jobID
 			) {
-		InvoiceItemImportWriter invoiceItemImportWriter = new InvoiceItemImportWriter(dataSource);
+		InvoiceItemImportWriter invoiceItemImportWriter = new InvoiceItemImportWriter(dataSource());
 		
         return invoiceItemImportWriter;
     }
@@ -173,7 +194,7 @@ public class ImportInvoice {
 	public Step uploadFileContentStep() {
 		
 		InvoiceFileStepListener listener = new InvoiceFileStepListener();
-		listener.setDataSource(dataSource);
+		listener.setDataSource(dataSource());
 		return stepBuilderFactory.get("uploadFileContentStep")
 				.<InvoiceDTO,Invoice>chunk(importChunk)
 				.reader(reader(null))
@@ -214,7 +235,7 @@ public class ImportInvoice {
     @Bean
     public Step fileInfoStep() {
     	uploadFileInfo task = new uploadFileInfo();
-        task.setDataSource(dataSource);
+        task.setDataSource(dataSource());
         return stepBuilderFactory.get("backUpStep")
                 .tasklet(task)
                 .build();
@@ -268,14 +289,17 @@ public class ImportInvoice {
 	}
     
 	@Bean
-	 public JdbcCursorItemReader<InvoiceExpDTO> expInvoiceReader(){
+    @StepScope
+	 public JdbcCursorItemReader<InvoiceExpDTO> expInvoiceReader(
+			 @Value("#{stepExecution.jobExecution.id}") Long jobID
+			 ){
 	  JdbcCursorItemReader<InvoiceExpDTO> reader = new JdbcCursorItemReader<InvoiceExpDTO>();
-	  reader.setDataSource(dataSource);
+	  reader.setDataSource(dataSource());
 	  reader.setSql("select " +
 	  		"iv.id\r\n" + 
 	  		",'FB01' as tx_code\r\n" + 
 	  		",'2016' as comp_code\r\n" + 
-	  		",vm.vendor_id\r\n" + 
+	  		",COALESCE(vm.vendor_id,'NOT_FOUND') as vendor_id\r\n" + 
 	  		",iv.Doc_Date \r\n" + 
 	  		",iv.Posting_Date \r\n" + 
 	  		",iv.Period \r\n" + 
@@ -283,7 +307,7 @@ public class ImportInvoice {
 	  		",iv.currency_code \r\n" + 
 	  		",iv.ref_no \r\n" + 
 	  		",iv.doc_hdr_txt \r\n" + 
-	  		",pkc.post_key\r\n" + 
+	  		",COALESCE(pkc.post_key,'NOT_FOUND' ) as post_key\r\n" + 
 	  		",iv.Account \r\n" + 
 	  		",iv.Amnt_Doc_Curr \r\n" + 
 	  		",iv.Amnt_local_Type \r\n" + 
@@ -317,14 +341,15 @@ public class ImportInvoice {
 	  		" from invoice\r\n" + 
 	  		" where 1=1\r\n" + 
 	  		" and creationdate>=current_Date -"+daysAgo+"\r\n" + 
+	  		" and job_execution_id="+jobID+"\r\n" + 
 	  		" ) as iv\r\n" + 
-	  		" , vendor_map as vm\r\n" + 
-	  		" , post_key_conf as pkc\r\n" + 
-	  		"where 1=1\r\n" + 
-	  		"and iv.party_id = vm.party_id\r\n" + 
-	  		"and iv.Amnt_local_Type=pkc.Amnt_local_Type\r\n" + 
-	  		"and iv.invoice_type_code=pkc.doc_type_code\r\n" + 
-	  		"ORDER BY 1, 2 ;  ");
+	  		" 	left join vendor_map as vm on iv.party_id = vm.party_id\r\n" + 
+	  		"	left join post_key_conf as pkc on \r\n" + 
+	  		"	iv.Amnt_local_Type=pkc.Amnt_local_Type \r\n" + 
+	  		"	and iv.invoice_type_code=pkc.doc_type_code\r\n" + 
+	  		" where 1=1 \r\n" + 
+	  		" ORDER BY 1, 2 ;    "
+	  		);
 	  reader.setRowMapper(new InvoiceExpRowMapper());
 	  
 	  return reader;
@@ -352,19 +377,20 @@ public class ImportInvoice {
 		return stepBuilderFactory
 				.get("stepExportInvoiceStep")
 				.<InvoiceExpDTO,InvoiceExpDTO> chunk(exportChunk)
-				.reader(expInvoiceReader())
+				.reader(expInvoiceReader(null))
 				.processor(expInvoiceProc())
 				.writer(expInvoiceXLSWriter())
 				.build();
 	}
     
-    @Bean(name = "partitionerJob")
-    public Job partitionerJob() throws UnexpectedInputException, MalformedURLException, ParseException {
+    @Bean
+    public Job ImportInvoiceJob() throws UnexpectedInputException, MalformedURLException, ParseException {
     	
     	JobCompletionNotificationListener listener = new JobCompletionNotificationListener();
-    	listener.setDataSource(dataSource);
+    	listener.setDataSource(dataSource());
+    	//JobParameters parameters = (new JobParametersBuilder()).addDate("rundate", new Date()).toJobParameters();
         return jobBuilderFactory
-        		.get("ImportInvoicePartitionerJob")
+        		.get("ImportInvoiceJob")
         		.listener(listener)
         		.incrementer(new RunIdIncrementer())
         		.start(backUpStep())

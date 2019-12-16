@@ -37,7 +37,7 @@ public class CustomMultiResourcePartitioner implements Partitioner {
     
 	@Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        log.info("gridSize: "+gridSize);
+        log.info("gridSize: {}",gridSize);
         Map<String, ExecutionContext> map = new HashMap<>(gridSize);
         int i = 0, k = 1;
         String filePath,fileID,fileName;
@@ -55,7 +55,7 @@ public class CustomMultiResourcePartitioner implements Partitioner {
 				context.putString("fileName", fileName);		
 				context.putString("UUID", fileID);				
 				context.putInt("fileProcCounter", 0);		
-		        log.info("partitioner, filePath: "+context.getString("filePath"));
+		        log.info("partitioner, filePath: {}",context.getString("filePath"));
 
 				
 				
@@ -69,7 +69,7 @@ public class CustomMultiResourcePartitioner implements Partitioner {
             i++;
         }
         
-        log.info("map: "+map.size());
+        log.info("map: {}",map.size());
         return map;
     }
 }

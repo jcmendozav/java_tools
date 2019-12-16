@@ -12,5 +12,10 @@ public class Party{
 	public PartyIdentification getPartyIdentification() {
 		return partyIdentification;
 	}
+	@Override
+	public String toString() {
+		return "Party [partyIdentification=" + partyIdentification + "]";
+	}
+	
 	
 }

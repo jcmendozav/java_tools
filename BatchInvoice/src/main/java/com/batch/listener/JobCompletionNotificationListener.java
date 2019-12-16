@@ -38,7 +38,12 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 		// TODO Auto-generated method stub
 		if(jobExecution.getStatus()==BatchStatus.COMPLETED ) {
 			
-			log.info("!!! JOB FINISHED");
+			log.info("!!! JOB FINISHED: "
+					+ ",job_exec_id: {}"
+					+ ",job_id: {}"
+					,+jobExecution.getId()
+					,jobExecution.getJobId()
+					);
 //			jdbcTemplate
 //			.query("SELECT ID, issue_date,issue_time FROM invoice", 
 //					(rs,row) -> new InvoiceDTO(rs.getString("ID"),rs.getString(2),rs.getString(3)) )

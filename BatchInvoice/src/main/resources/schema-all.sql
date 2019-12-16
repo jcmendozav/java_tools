@@ -81,14 +81,14 @@ CREATE TABLE post_key_conf  (
     CONSTRAINT unq_post_conf UNIQUE(Amnt_local_Type,doc_type_code,post_key)
 );
 
-COPY post_key_conf(Amnt_local_Type,doc_type_code,post_key) 
-FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/post_key_conf.txt' DELIMITER ',' CSV HEADER;
+truncate post_key_conf;
+\COPY post_key_conf(Amnt_local_Type,doc_type_code,post_key) FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/post_key_conf.txt' DELIMITER ',' CSV HEADER;
 
 vendor_map
-party_id,vendor_id
-10100017491,EEE-001
-20100017491,EEE-002
-30100017491,EEE-003
+party_id,vendor_id,vendor_name
+10100017491,EEE-001,n1
+20100017491,EEE-002,n2
+30100017491,EEE-003,n3
 
 CREATE SEQUENCE vendor_map_id_seq;
 
@@ -98,6 +98,7 @@ CREATE TABLE vendor_map  (
     ID integer NOT NULL DEFAULT nextval('vendor_map_id_seq') PRIMARY KEY,
     party_id VARCHAR(16),
     vendor_id VARCHAR(16),
+    vendor_name varchar(128),
     creationdate TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT unq_vendor_map UNIQUE(party_id,vendor_id)
     
@@ -105,9 +106,8 @@ CREATE TABLE vendor_map  (
 );
 
 
-
-COPY vendor_map(party_id,vendor_id) 
-FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/vendor_map.txt' DELIMITER ',' CSV HEADER;
+truncate vendor_map;
+\COPY vendor_map(vendor_name,party_id,vendor_id)  FROM '/home/jcmendozav/Java_windows/java_tools/BatchInvoice/config/vendor_map.txt' DELIMITER ',' CSV HEADER ENCODING 'WIN1252';
 
 
 account_mapping

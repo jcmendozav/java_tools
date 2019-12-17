@@ -1,6 +1,9 @@
 package com.batch.config;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -20,11 +23,16 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.step.skip.SkipPolicy;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.file.FlatFileHeaderCallback;
+import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.batch.repeat.CompletionPolicy;
@@ -43,6 +51,7 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.StringUtils;
 
 import com.batch.listener.InvoiceFileStepListener;
 import com.batch.listener.JobCompletionNotificationListener;
@@ -53,6 +62,7 @@ import com.batch.partitioner.CustomMultiResourcePartitioner;
 import com.batch.procesor.InvoiceItemExportProcessor;
 import com.batch.procesor.InvoiceItemImportProcessor;
 import com.batch.reader.InvoiceExpRowMapper;
+import com.batch.reader.InvoiceRowMapper;
 import com.batch.skipPolicy.ImportInvoiceSkipPolicy;
 import com.batch.tasklet.FileCopyTasklet;
 import com.batch.tasklet.FileDeletingTasklet;
@@ -288,7 +298,7 @@ public class ImportInvoice {
 		return asyncTaskExecutor;
 	}
     
-	@Bean
+	@Bean(destroyMethod="")
     @StepScope
 	 public JdbcCursorItemReader<InvoiceExpDTO> expInvoiceReader(
 			 @Value("#{stepExecution.jobExecution.id}") Long jobID
@@ -382,8 +392,99 @@ public class ImportInvoice {
 				.writer(expInvoiceXLSWriter())
 				.build();
 	}
-    
-    @Bean
+	
+	
+	@Bean
+	public Step stepExportImportResultStep() {
+		return stepBuilderFactory
+				.get("stepExportImportResultStep")
+				.<Invoice,Invoice> chunk(exportChunk)
+				.reader(expImportResultReader(null))
+				//.processor(expInvoiceProc())
+				.writer(expImportResultWriter(null))
+				.build();
+	}
+	
+	
+	@Bean(destroyMethod="")
+    @StepScope
+    public JdbcCursorItemReader<Invoice> expImportResultReader(
+			 @Value("#{stepExecution.jobExecution.id}") Long jobID
+    		) {
+  	  JdbcCursorItemReader<Invoice> reader = new JdbcCursorItemReader<>();
+  	  reader.setDataSource(dataSource());
+  	  reader.setSql(""
+  	  		+ "select * from invoice "
+  	  		+ "where 1=1 "
+  	  		+ "and job_execution_id = "+jobID+" ;"
+  	  		+ "");
+  	  reader.setRowMapper(new InvoiceRowMapper());
+		return reader;
+	}
+	
+	@Bean
+    @StepScope
+    public FlatFileItemWriter<Invoice> expImportResultWriter(
+			 @Value("#{stepExecution.jobExecution.id}") Long jobID
+
+			) {
+		
+		String [] fieldNames = new String[] {
+				"partyId"
+				,"vendorId"
+				,"customSerie"
+				,"numberSerie"
+				,"issueTimeStamp"
+				,"issueTime"
+				,"issueDate"
+				,"currencyCode"
+				,"lineExtensionAmount"
+				,"taxAmount"
+				,"payableAmount"
+				,"taxCode"
+				,"invoiceTypeCode"
+				,"docDate"
+				,"jobExecutionID"
+				,"fileID"
+				,"fileName"
+				,"filePath"
+				,"procStatus"
+				,"procDesc"
+				,"ID"
+				,"invoiceId"
+				,"status"
+				,"lastUpdatedDate"
+				,"creationDate"};
+        FlatFileItemWriter<Invoice> writer = new FlatFileItemWriter<>();
+        String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
+
+        String outputFilePath=String.format("%s/importResult_%s_%s.csv",this.outputPath,jobID,timeStamp );
+        writer.setResource(new FileSystemResource(outputFilePath));
+        writer.setAppendAllowed(true);
+        writer.setHeaderCallback(new FlatFileHeaderCallback() {
+			
+			@Override
+			public void writeHeader(Writer writer) throws IOException {
+				// TODO Auto-generated method stub
+				writer.append(StringUtils.arrayToDelimitedString(fieldNames, ","));
+			}
+		});
+        writer.setLineAggregator(new DelimitedLineAggregator<Invoice>() {
+        	{
+        	setDelimiter(",");
+        	setFieldExtractor(new BeanWrapperFieldExtractor<Invoice>() {
+        		
+        		{
+        			setNames( fieldNames);
+        		}
+        			});
+        	}}
+        		);
+        
+		return writer;
+	}
+
+	@Bean
     public Job ImportInvoiceJob() throws UnexpectedInputException, MalformedURLException, ParseException {
     	
     	JobCompletionNotificationListener listener = new JobCompletionNotificationListener();
@@ -396,7 +497,10 @@ public class ImportInvoice {
         		.start(backUpStep())
         		.next(partitionStep())
         		.on("FAILED").end()
-                .from(partitionStep()).on("COMPLETED").to(deleteInputFilesStep()).next(stepExportInvoiceStep())
+                .from(partitionStep()).on("COMPLETED")
+                .to(deleteInputFilesStep())
+                .next(stepExportImportResultStep())
+                .next(stepExportInvoiceStep())
         		.end()
         		.build();
     }

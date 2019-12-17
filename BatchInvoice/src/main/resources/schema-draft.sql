@@ -49,6 +49,8 @@ ALTER TABLE invoice ADD COLUMN tax_code VARCHAR(8);
 ALTER TABLE invoice ADD COLUMN invoice_type_code VARCHAR(8);
 ALTER TABLE invoice ADD COLUMN doc_date TIMESTAMP WITH TIME ZONE;
 ALTER TABLE invoice ADD COLUMN job_execution_id numeric;
+ALTER TABLE invoice ADD COLUMN proc_status numeric default 0;
+ALTER TABLE invoice ADD COLUMN proc_desc VARCHAR(256);
 
 select 
 custom_serie,issue_date,issue_time,number_serie,ta,pa,lea,party_id

@@ -17,5 +17,14 @@ public class AccountingSupplierParty{
 		return "AccountingSupplierParty [party=" + party + "]";
 	}
 	
+	public AccountingSupplierParty() {
+		// TODO Auto-generated constructor stub
+		init();
+	}
+	
+	public void init()
+	{
+		this.party=new Party();
+	}
 	
 }

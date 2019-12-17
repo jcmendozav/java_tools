@@ -1,5 +1,8 @@
 package com.batch.model;
 
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Set;
 
@@ -83,12 +86,12 @@ public class Invoice {
 	public void setTaxCode(String taxCode) {
 		this.taxCode = taxCode;
 	}
-	public void setDocDate(Date docDate) {
+	public void setDocDate(LocalDateTime docDate) {
 		// TODO Auto-generated method stub
 		this.docDate=(docDate);
 	}
 
-	public Date getDocDate() {
+	public LocalDateTime getDocDate() {
 		return docDate;
 	}
 	
@@ -129,6 +132,62 @@ public class Invoice {
 		return filePath;
 	}
 	
+	public void setProcDesc(String procDesc) {
+		this.procDesc = procDesc;
+	}
+	
+	public String getProcDesc() {
+		return procDesc;
+	}
+	
+	public void setProcStatus(int procStatus) {
+		this.procStatus = procStatus;
+	}
+	
+	public int getProcStatus() {
+		return procStatus;
+	}
+	
+	public void setId(int id) {
+		// TODO Auto-generated method stub
+		this.ID=id;
+	}
+	public void setInvoiceId(String invoiceId) {
+		// TODO Auto-generated method stub
+		this.invoiceId=invoiceId;
+	}
+	public void setStatus(int status) {
+		// TODO Auto-generated method stub
+		this.status=status;
+	}
+	public void setLastUpdatedDate(LocalDateTime lastUpdatedDate) {
+		// TODO Auto-generated method stub
+		this.lastUpdatedDate=lastUpdatedDate;
+	}
+	
+	public void setCreationDate(LocalDateTime creationDate) {
+		this.creationDate = creationDate;
+	}
+	
+	public int getID() {
+		return ID;
+	}
+	public void setID(int iD) {
+		ID = iD;
+	}
+	public String getInvoiceId() {
+		return invoiceId;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public LocalDateTime getLastUpdatedDate() {
+		return lastUpdatedDate;
+	}
+	public LocalDateTime getCreationDate() {
+		return creationDate;
+	}
+
 	String partyId;
 	String vendorId;
 	String customSerie;
@@ -142,10 +201,19 @@ public class Invoice {
 	Double payableAmount;
 	String taxCode;
 	String invoiceTypeCode;
-	private Date docDate;
+	private LocalDateTime docDate;
 	Long jobExecutionID;
 	int fileID;
 	String fileName;
 	String filePath;
+	int procStatus;
+	String procDesc;
+	private int ID;
+	private String invoiceId;
+	private int status;
+	private LocalDateTime lastUpdatedDate;
+	private LocalDateTime creationDate;
+
+
 
 }

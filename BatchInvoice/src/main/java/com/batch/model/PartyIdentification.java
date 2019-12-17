@@ -19,5 +19,11 @@ public class PartyIdentification{
 		return "PartyIdentification [ID=" + ID + "]";
 	}
 	
+	public PartyIdentification() {
+		// TODO Auto-generated constructor stub
+		this.ID="EMPTY";
+		
+	}
+	
 	
 }

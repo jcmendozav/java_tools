@@ -17,5 +17,10 @@ public class Party{
 		return "Party [partyIdentification=" + partyIdentification + "]";
 	}
 	
+	public Party() {
+		// TODO Auto-generated constructor stub
+		this.partyIdentification=new PartyIdentification();
+	}
+	
 	
 }

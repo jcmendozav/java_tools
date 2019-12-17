@@ -36,6 +36,7 @@ public class InvoiceDTO {
 	
 	public InvoiceDTO() {
 		// TODO Auto-generated constructor stub
+		init();
 	}
 
     public String getInvoiceTypeCode() {
@@ -76,10 +77,27 @@ public class InvoiceDTO {
 	}
     
     public TaxTotal getTaxTotal() {
+    	
 		return taxTotal;
 	}
     
+    
+    public void init()
+    {
+        this.ID="EMPTY";
+        this.issueDate="EMPTY";
+        this.issueTime="EMPTY";
+        this.invoiceTypeCode="EMPTY";
+        this.documentCurrencyCode="EMPTY";
+        this.accountingSupplierParty=new AccountingSupplierParty();
+        this.legalMonetaryTotal = new LegalMonetaryTotal();
+        this.taxTotal=new TaxTotal();
+        this.filePath="EMPTY";
+    	
+    }
+    
     public InvoiceDTO(String ID,String issueDate,String issueTime, String documentCurrencyCode, String invoiceTypeCode) {
+    	init();
 		this.ID=ID;
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;
@@ -89,6 +107,7 @@ public class InvoiceDTO {
 	}
 	
 	public InvoiceDTO(String ID,String issueDate,String issueTime) {
+		init();
 		this.ID=ID;
 		this.issueDate=issueDate;
 		this.issueTime=issueTime;

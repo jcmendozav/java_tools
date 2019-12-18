@@ -128,14 +128,15 @@ public class ImportInvoice {
 	
 	@Bean
 	@Primary
-	@ConfigurationProperties("spring.datasource")
+	//@ConfigurationProperties("spring.datasource")
+	@ConfigurationProperties("inmemory.datasource")
 	public DataSourceProperties firstDataSourceProperties() {
 	    return new DataSourceProperties();
 	}
 
 	@Bean
 	@Primary
-	@ConfigurationProperties("app.datasource.first")
+//@ConfigurationProperties("app.datasource.first")
 	public DataSource dataSource() {
 	    return firstDataSourceProperties().initializeDataSourceBuilder().build();
 	}
@@ -305,60 +306,44 @@ public class ImportInvoice {
 			 ){
 	  JdbcCursorItemReader<InvoiceExpDTO> reader = new JdbcCursorItemReader<InvoiceExpDTO>();
 	  reader.setDataSource(dataSource());
-	  reader.setSql("select " +
-	  		"iv.id\r\n" + 
-	  		",'FB01' as tx_code\r\n" + 
-	  		",'2016' as comp_code\r\n" + 
-	  		",COALESCE(vm.vendor_id,'NOT_FOUND') as vendor_id\r\n" + 
-	  		",iv.Doc_Date \r\n" + 
-	  		",iv.Posting_Date \r\n" + 
-	  		",iv.Period \r\n" + 
-	  		",'KU' as doc_type\r\n" + 
-	  		",iv.currency_code \r\n" + 
-	  		",iv.ref_no \r\n" + 
-	  		",iv.doc_hdr_txt \r\n" + 
-	  		",COALESCE(pkc.post_key,'NOT_FOUND' ) as post_key\r\n" + 
-	  		",iv.Account \r\n" + 
-	  		",iv.Amnt_Doc_Curr \r\n" + 
-	  		",iv.Amnt_local_Type \r\n" + 
-	  		",'ZP07' as paym_trm \r\n" + 
-	  		",iv.Doc_Date as base_date\r\n" + 
-	  		",'CCntr' as ccntr\r\n" + 
-	  		",'Assign. No' as assign_no\r\n" + 
-	  		",'Itm txt' as itm_txt\r\n" + 
-	  		",iv.tax_code \r\n" + 
-	  		",file_id\r\n" + 
-	  		"FROM (\r\n" + 
-	  		" SELECT ROW_NUMBER() OVER (ORDER BY id) AS group,  \r\n" + 
-	  		"unnest(array[id, id, id]) AS id,  \r\n" + 
-	  		"unnest(array[currency_code, currency_code, currency_code]) AS currency_code,  \r\n" + 
-	  		"unnest(array[file_id, file_id, file_id]) AS file_id,  \r\n" + 
-	  		"unnest(array[tax_code, tax_code, tax_code]) AS tax_code,  \r\n" + 
-	  		"unnest(array[issue_date, issue_date, issue_date]) AS Doc_Date,  \r\n" + 
-	  		"unnest(array[current_Date, current_Date, current_Date]) AS Posting_Date,  \r\n" + 
-	  		"unnest(array[date_part('month', doc_date), date_part('month', doc_date), date_part('month', doc_date)]) AS Period,  \r\n" + 
-	  		"unnest(array[number_serie, number_serie, number_serie]) AS ref_no,  \r\n" + 
-	  		"unnest(array[custom_serie, custom_serie, custom_serie]) AS doc_hdr_txt,  \r\n" + 
-	  		"unnest(array['TBD', 'TBD','TBD']) AS Account,  \r\n" + 
-	  		"unnest(array[issue_date, issue_date, issue_date]) AS Base_Date,  \r\n" + 
-	  		"--unnest(array['TBD', 'TBD','TBD']) AS CCntr,  \r\n" + 
-	  		"--unnest(array['TBD', 'TBD','TBD']) AS Assign_no,  \r\n" + 
-	  		"--unnest(array['TBD', 'TBD','TBD']) AS itm_txt,  \r\n" + 
-	  		"unnest(array[party_id, party_id,party_id]) AS party_id,  \r\n" + 
-	  		"unnest(array[invoice_type_code, invoice_type_code,invoice_type_code]) AS invoice_type_code,\r\n" + 
-	  		"unnest(array[ta, lea,pa ]) AS Amnt_Doc_Curr,\r\n" + 
-	  		"unnest(array['igv', 'sub-total','total']) AS Amnt_local_Type  \r\n" + 
-	  		" from invoice\r\n" + 
-	  		" where 1=1\r\n" + 
-	  		" and creationdate>=current_Date -"+daysAgo+"\r\n" + 
-	  		" and job_execution_id="+jobID+"\r\n" + 
-	  		" ) as iv\r\n" + 
-	  		" 	left join vendor_map as vm on iv.party_id = vm.party_id\r\n" + 
-	  		"	left join post_key_conf as pkc on \r\n" + 
-	  		"	iv.Amnt_local_Type=pkc.Amnt_local_Type \r\n" + 
-	  		"	and iv.invoice_type_code=pkc.doc_type_code\r\n" + 
-	  		" where 1=1 \r\n" + 
-	  		" ORDER BY 1, 2 ;    "
+	  reader.setSql("SELECT IV.ID AS ID\r\n" + 
+	  		",'FB01' AS TX_CODE\r\n" + 
+	  		",'2016' AS COMP_CODE\r\n" + 
+	  		",COALESCE(VM.VENDOR_ID,'NOT_FOUND') AS VENDOR_ID\r\n" + 
+	  		",IV.ISSUE_DATE as DOC_DATE \r\n" + 
+	  		",CURRENT_DATE as POSTING_DATE \r\n" + 
+	  		",month(IV.DOC_DATE) as PERIOD \r\n" + 
+	  		",'KU' AS DOC_TYPE\r\n" + 
+	  		",IV.CURRENCY_CODE \r\n" + 
+	  		",IV.NUMBER_SERIE as REF_NO \r\n" + 
+	  		",IV.CUSTOM_SERIE as DOC_HDR_TXT \r\n" + 
+	  		",COALESCE(PKC.POST_KEY,'NOT_FOUND' ) AS POST_KEY\r\n" + 
+	  		",'TBD' as ACCOUNT \r\n" + 
+	  		",IV.AMNT_DOC_CURR \r\n" + 
+	  		",IV.AMNT_LOCAL_TYPE \r\n" + 
+	  		",'ZP07' AS PAYM_TRM \r\n" + 
+	  		",IV.ISSUE_DATE AS BASE_DATE\r\n" + 
+	  		",'CCntr' AS CCNTR\r\n" + 
+	  		",'Assign. No' AS ASSIGN_NO\r\n" + 
+	  		",'Itm txt' AS ITM_TXT\r\n" + 
+	  		",IV.TAX_CODE \r\n" + 
+	  		",FILE_ID\r\n" + 
+	  		"FROM (select *,ta as Amnt_Doc_Curr, 'igv' as Amnt_local_Type from invoice where 1=1 and JOB_EXECUTION_ID="+jobID+" \r\n" + 
+	  		"union all\r\n" + 
+	  		"select *,lea as Amnt_Doc_Curr, 'sub-total' as Amnt_local_Type from invoice where 1=1 and JOB_EXECUTION_ID="+jobID+"  \r\n" + 
+	  		"union all\r\n" + 
+	  		"select *,pa as Amnt_Doc_Curr, 'total' as Amnt_local_Type from invoice where 1=1 and JOB_EXECUTION_ID="+jobID+" \r\n" + 
+	  		" ) AS IV\r\n" + 
+	  		" 	LEFT JOIN VENDOR_MAP AS VM ON IV.PARTY_ID = VM.PARTY_ID\r\n" + 
+	  		"	LEFT JOIN POST_KEY_CONF AS PKC ON \r\n" + 
+	  		"	IV.AMNT_LOCAL_TYPE=PKC.AMNT_LOCAL_TYPE \r\n" + 
+	  		"	AND IV.INVOICE_TYPE_CODE=PKC.DOC_TYPE_CODE\r\n" + 
+	  		" WHERE 1=1 \r\n" + 
+	  		" and JOB_EXECUTION_ID="+jobID+"\r\n" + 
+	  		"order by 1,2;" + 
+	  		//" WHERE 1=1 \r\n" + 
+	  		//" ORDER BY 1, 2 "+
+	  		 ";    "
 	  		);
 	  reader.setRowMapper(new InvoiceExpRowMapper());
 	  

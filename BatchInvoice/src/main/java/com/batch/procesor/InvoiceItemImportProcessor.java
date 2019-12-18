@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -89,7 +91,12 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		) {
 			throw new MissingMandadoryInvoiceFields(invoiceDTO);
 		}
-		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss.SS");
+		//DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss.SS");
+		
+		DateTimeFormatter dtf = new DateTimeFormatterBuilder()
+			    .appendPattern("yyyy-MM-ddHH:mm:ss")
+			    .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
+			    .toFormatter();
 		DateValidator validator = new DateValidatorUsingDateTimeFormatter(dtf);
 		String dateStr = invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime();
 		if(!validator.isValid(dateStr)) {

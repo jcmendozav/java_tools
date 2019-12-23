@@ -12,5 +12,9 @@ public class MissingMandadoryInvoiceFields extends Exception {
 		// TODO Auto-generated constructor stub
 		this.invoiceDTO=invoiceDTO;
 	}
-
+	@Override
+	public String getMessage() {
+		return String.format("Missing Mandadory Invoice Fields: input: %s", this.invoiceDTO.toString());
+		
+	}
 }

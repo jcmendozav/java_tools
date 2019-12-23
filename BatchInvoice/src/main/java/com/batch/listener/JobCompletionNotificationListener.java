@@ -25,6 +25,12 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 	private JdbcTemplate jdbcTemplate;
 
 	//private ExecutorConfigurationSupport taskExecutor;
+	
+	@Override
+	public void beforeJob(JobExecution jobExecution) {
+		// TODO Auto-generated method stub
+		super.beforeJob(jobExecution);
+	}
 
   @Autowired
   public JobCompletionNotificationListener() {

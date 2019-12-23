@@ -1,7 +1,18 @@
 package com.batch.model;
 
 public class InvoiceFile {
+	
+	public InvoiceFile() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public InvoiceFile(String fileName, String filePath)
+	{
+		this.fileName=fileName;
+		this.filePath=filePath;
+	}
 
+	
 	public String getFileName() {
 		return fileName;
 	}

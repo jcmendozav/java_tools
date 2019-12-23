@@ -1,6 +1,7 @@
 package com.batch.tasklet;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,11 +13,13 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
  
-public class FileCopyTasklet implements Tasklet, InitializingBean {
+public class FileCopyTasklet implements Tasklet, InitializingBean,ResourceReloader {
  
 	
 	private static final Logger log = LoggerFactory.getLogger(FileCopyTasklet.class);
@@ -43,14 +46,29 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
 		this.ext = ext;
 	}
 
+	public void setLocationPattern(String locationPattern) {
+		this.locationPattern = locationPattern;
+	}
+	
+	public String getLocationPattern() {
+		return locationPattern;
+	}
+	
 	private String ext;
 
 	private String dateFormat;
+	
+	private String locationPattern;
+	
+	
 	
 
  
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
          
+    	resources = reloadResources(this.locationPattern);
+    	log.info("Copying {} files",resources.length);
+
         for(Resource r: resources) {
         	
             File fileSource = r.getFile();
@@ -77,6 +95,9 @@ public class FileCopyTasklet implements Tasklet, InitializingBean {
     public void setResources(Resource[] resources) {
         this.resources = resources;
     }
+   
+    
+    
  
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(resources, "directory must be set");

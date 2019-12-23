@@ -42,7 +42,6 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new NamedParameterJdbcTemplate( dataSource);
-		//this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource);
 		this.repository=new InvoiceFileRepository(dataSource);
 	}
 	
@@ -71,7 +70,7 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 
     	} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e.getMessage(),e);;
 		}
 
 		log.debug("invoiceFile fileID: {}",fileID);

@@ -42,12 +42,13 @@ public class InvoiceRowMapper implements RowMapper<Invoice> {
 		invoice.setStatus(rs.getInt("status"));
 		invoice.setFileID(rs.getInt("file_id"));
 		invoice.setJobExecutionID(rs.getLong("job_execution_id"));
-		invoice.setDocDate(rs.getTimestamp("doc_date").toLocalDateTime());
-		invoice.setLastUpdatedDate(rs.getTimestamp("last_update_date").toLocalDateTime());
-		invoice.setCreationDate(rs.getTimestamp("creationdate").toLocalDateTime());
+		invoice.setDocDate(rs.getTimestamp("doc_date")==null?null:rs.getTimestamp("doc_date").toLocalDateTime());
+		invoice.setLastUpdatedDate(rs.getTimestamp("last_update_date")==null?null:rs.getTimestamp("last_update_date").toLocalDateTime());
+		invoice.setCreationDate(rs.getTimestamp("creationdate")==null?null:rs.getTimestamp("creationdate").toLocalDateTime());
 		invoice.setInvoiceTypeCode(rs.getString("invoice_type_code"));
 		invoice.setProcStatus(rs.getInt("proc_status"));
 		invoice.setProcDesc(rs.getString("proc_desc"));
+		invoice.setFilePath(rs.getString("file_path"));
 		
 		return invoice ;
 	}

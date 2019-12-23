@@ -1,6 +1,5 @@
 package com.batch.skipPolicy;
 
-import java.time.format.DateTimeParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,6 @@ import org.springframework.batch.core.step.skip.SkipPolicy;
 
 import com.batch.exception.DateFormatInvoiceFields;
 import com.batch.exception.MissingMandadoryInvoiceFields;
-import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 
 public class ImportInvoiceSkipPolicy implements SkipPolicy {
@@ -35,7 +33,7 @@ public class ImportInvoiceSkipPolicy implements SkipPolicy {
 			log.error("Skiped due to DateTimeParseException: {}", dto.toString());
 			return true;
 		} else {
-			log.trace("Skiped due to generic error: {}", t);
+			log.error("Skiped due to generic error: {}", t);
 			return false;
 
 		}

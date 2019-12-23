@@ -40,16 +40,18 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 	public void write(List<? extends Invoice> items) throws Exception {
 		ExecutionContext executionContext = this.stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");
-		log.debug(
-				"File Info from writer: "
-						+ ",fileName:{}"
-						+ ",fileProcCounter:{}"
-						+ ",items:{}"
-						,executionContext.getString("fileName")
-						,fileProcCount
-						,items.size()
-				//+ ", processing item = " + invoiceDTO.toString() 
-				);
+//		log.info(
+//				"File Info from writer: "
+//						+ ",fileName:{}"
+//						+ ",fileProcCounter:{}"
+//						+ ",items:{}"
+//						,executionContext.getString("fileName")
+//						,fileProcCount
+//						,items.size()
+//				//+ ", processing item = " + invoiceDTO.toString() 
+//				);
+		
+		log.info("Wrinting invoice rows: {}",Arrays.toString(items.toArray()));
 		
 		
 		SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(items.toArray());
@@ -70,6 +72,8 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 						+ ",job_execution_id"
 						+ ",file_id"
 						+ ",currency_code"
+						+ ",proc_status"
+						+ ",proc_desc"
 						+ ") "
 						+ "values "
 						+ "("
@@ -87,9 +91,11 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 						+ ",:jobExecutionID"
 						+ ",:fileID"
 						+ ",:currencyCode"
+						+ ",:procStatus"
+						+ ",:procDesc"
 						+ ")"				
 				, batch);
-		log.debug("updateCounts: {}",Arrays.toString(updateCounts));
+		log.info("updateCounts: {}",Arrays.toString(updateCounts));
 	}
 
 	

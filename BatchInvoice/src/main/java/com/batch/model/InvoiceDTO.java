@@ -1,5 +1,8 @@
 package com.batch.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -81,6 +84,15 @@ public class InvoiceDTO {
 		return taxTotal;
 	}
     
+    @XmlElement(name="InvoiceLine",namespace = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")
+    public void setInvoiceLines(List<InvoiceLine> invoiceLines) {
+		this.invoiceLines = invoiceLines;
+	}
+    
+    public List<InvoiceLine> getInvoiceLines() {
+		return invoiceLines;
+	}
+    
     
     public void init()
     {
@@ -113,16 +125,6 @@ public class InvoiceDTO {
 		this.issueTime=issueTime;
 	}
 	
-    private String ID;
-    private String issueDate;
-    private String issueTime;
-	private String invoiceTypeCode;
-    private String documentCurrencyCode;
-    private AccountingSupplierParty accountingSupplierParty;
-    private LegalMonetaryTotal legalMonetaryTotal;
-    private TaxTotal taxTotal;
-	private String filePath;
-
 
 	public String toStringCustom() {
 		return "Invoice ["
@@ -136,24 +138,44 @@ public class InvoiceDTO {
 				+ ", igv="+ taxTotal.getTaxAmount()
 				+ ", subtotal="+ legalMonetaryTotal.getLineExtensionAmount()
 				+ ", total="+ legalMonetaryTotal.getPayableAmount()
+				+ ", invoiceLines="+ invoiceLines.toString()
 				+ "]";
 	}
 
 
 	
 
+	
+	
 	@Override
 	public String toString() {
 		return "InvoiceDTO [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
 				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode + ", accountingSupplierParty="
 				+ accountingSupplierParty + ", legalMonetaryTotal=" + legalMonetaryTotal + ", taxTotal=" + taxTotal
-				+ ", filePath=" + filePath + "]";
+				+ ", filePath=" + filePath + ", invoiceLines=" + invoiceLines + "]";
 	}
 	public void setFilePath(String filePath) {
 		// TODO Auto-generated method stub
 		this.filePath=filePath;
 		
 	}
+	
+	public String getFilePath() {
+		return filePath;
+	}
+
+	
+    private String ID;
+    private String issueDate;
+    private String issueTime;
+	private String invoiceTypeCode;
+    private String documentCurrencyCode;
+    private AccountingSupplierParty accountingSupplierParty;
+    private LegalMonetaryTotal legalMonetaryTotal;
+    private TaxTotal taxTotal;
+	private String filePath;
+	private List<InvoiceLine> invoiceLines;
+
 
 	
 	

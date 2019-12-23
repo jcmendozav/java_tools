@@ -187,6 +187,23 @@ public class Invoice {
 	public LocalDateTime getCreationDate() {
 		return creationDate;
 	}
+	
+	
+
+	@Override
+	public String toString() {
+		return "Invoice [partyId=" + partyId + ", vendorId=" + vendorId + ", customSerie=" + customSerie
+				+ ", numberSerie=" + numberSerie + ", issueTimeStamp=" + issueTimeStamp + ", issueTime=" + issueTime
+				+ ", issueDate=" + issueDate + ", currencyCode=" + currencyCode + ", lineExtensionAmount="
+				+ lineExtensionAmount + ", taxAmount=" + taxAmount + ", payableAmount=" + payableAmount + ", taxCode="
+				+ taxCode + ", invoiceTypeCode=" + invoiceTypeCode + ", docDate=" + docDate + ", jobExecutionID="
+				+ jobExecutionID + ", fileID=" + fileID + ", fileName=" + fileName + ", filePath=" + filePath
+				+ ", procStatus=" + procStatus + ", procDesc=" + procDesc + ", ID=" + ID + ", invoiceId=" + invoiceId
+				+ ", status=" + status + ", lastUpdatedDate=" + lastUpdatedDate + ", creationDate=" + creationDate
+				+ "]";
+	}
+
+
 
 	String partyId;
 	String vendorId;
@@ -213,6 +230,7 @@ public class Invoice {
 	private int status;
 	private LocalDateTime lastUpdatedDate;
 	private LocalDateTime creationDate;
+	
 
 
 

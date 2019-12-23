@@ -2,6 +2,8 @@ package com.batch.tasklet;
 
 import java.io.File;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -11,12 +13,27 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
  
-public class FileDeletingTasklet implements Tasklet, InitializingBean {
+public class FileDeletingTasklet implements Tasklet, InitializingBean, ResourceReloader {
+	
+	
+	private static final Logger log = LoggerFactory.getLogger(FileDeletingTasklet.class);
+
  
     private Resource[] resources;
+
+
+	private String locationPattern;
  
+	public void setLocationPattern(String locationPattern) {
+		this.locationPattern = locationPattern;
+	}
+	public String getLocationPattern() {
+		return locationPattern;
+	}
+	
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-         
+    	resources = reloadResources(this.locationPattern);
+    	log.info("Deleting {} files",resources.length);
         for(Resource r: resources) {
         	
             File file = r.getFile();

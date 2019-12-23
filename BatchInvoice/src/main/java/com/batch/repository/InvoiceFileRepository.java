@@ -20,30 +20,10 @@ public class InvoiceFileRepository {
 	
 	private static final Logger log = LoggerFactory.getLogger(InvoiceFileRepository.class);
 
+
+	private final String INSERT_SQL = invoiceSQL.INSERT_SQL;
 	
-	private final String INSERT_SQL = "INSERT INTO invoice_file_job"
-			+ "("
-			+ "file_name"
-			+ ",file_path"
-			+ ",uuid"
-			+ ",lines"
-			+ ",size"
-			+ ",job_id"
-			+ ") "
-			+ "values "
-			+ "("
-			+ ":fileName"
-			+ ",:filePath"
-			+ ",:uuid"
-			+ ",:lines"
-			+ ",:size"
-			+ ",:jobID"
-			+ ")"		;
-	
-	private final String UPDATE_SQL = "UPDATE invoice_file_job "
-			+ "set object_counter=:objCounter "
-			+ ", last_update_date=CURRENT_TIMESTAMP "
-			+ "where id=:id";
+	private final String UPDATE_SQL = invoiceSQL.UPDATE_SQL;
 
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	
@@ -59,6 +39,7 @@ public class InvoiceFileRepository {
 
 	public int create(InvoiceFile invoiceFile) {
 		// TODO Auto-generated method stub
+		log.info("Creating InvoiceFile: {}",invoiceFile.toString());
 		KeyHolder holder = new GeneratedKeyHolder();
 		SqlParameterSource parameters = new MapSqlParameterSource()
 		.addValue("fileName", invoiceFile.getFileName())
@@ -75,12 +56,15 @@ public class InvoiceFileRepository {
 	
 	public InvoiceFile updateObjCounter(InvoiceFile invoiceFile) {
 		// TODO Auto-generated method stub
+		log.info("Updating InvoiceFile: {}",invoiceFile.toString());
 		SqlParameterSource parameters = new MapSqlParameterSource()
 		.addValue("id", invoiceFile.getID())
 		.addValue("objCounter", invoiceFile.getObjCounter());
 		jdbcTemplate.update(UPDATE_SQL, parameters);
 		return invoiceFile;
 	}
+	
+
 	
 	
 	

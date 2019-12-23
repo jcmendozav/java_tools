@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
+import com.batch.constant.InvoiceProcess;
 import com.batch.exception.DateFormatInvoiceFields;
 import com.batch.exception.MissingMandadoryInvoiceFields;
 import com.batch.model.Invoice;
@@ -68,43 +69,41 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		ExecutionContext executionContext = stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");
 		String filePath=executionContext.getString("filePath");
-		invoiceDTO.setFilePath(filePath);
-		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
-		log.debug("InvoiceFile from processor "
-				+ ",invoiceFile: {}"
-				+ ",fileID: {}"
-				+ ",jobID: {}"
-				,invoiceFile
-				,stepExecution.getExecutionContext().getInt("fileID")
-				,stepExecution.getJobExecutionId()
-				);
 		
-		if(
-				invoiceDTO.getID()==null 
-			|| invoiceDTO.getID()=="EMPTY" 
-			|| invoiceDTO.getInvoiceTypeCode()==null 
-			|| invoiceDTO.getInvoiceTypeCode()=="EMPTY" 
-			|| invoiceDTO.getAccountingSupplierParty()==null 
-			|| invoiceDTO.getAccountingSupplierParty().getParty()==null 
-			|| invoiceDTO.getAccountingSupplierParty().getParty().getPartyIdentification()==null 
-			|| invoiceDTO.getAccountingSupplierParty().getParty().getPartyIdentification().getID()==null 
-		) {
-			throw new MissingMandadoryInvoiceFields(invoiceDTO);
-		}
+		
+		invoiceDTO.setFilePath(filePath);
+		
+//		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
+//		log.info("InvoiceFile from processor "
+//				+ ",invoiceFile: {}"
+//				+ ",fileID: {}"
+//				+ ",jobID: {}"
+//				,invoiceFile
+//				,stepExecution.getExecutionContext().getInt("fileID")
+//				,stepExecution.getJobExecutionId()
+//				);
+		Invoice invoice = new Invoice();
+		invoice.setFilePath(invoiceDTO.getFilePath());
+		invoice.setJobExecutionID(stepExecution.getJobExecutionId());
+		invoice.setFileID(stepExecution.getExecutionContext().getInt("fileID"));
+
+		try {
+			
+
 		//DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss.SS");
 		
 		DateTimeFormatter dtf = new DateTimeFormatterBuilder()
 			    .appendPattern("yyyy-MM-ddHH:mm:ss")
 			    .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
 			    .toFormatter();
-		DateValidator validator = new DateValidatorUsingDateTimeFormatter(dtf);
+		
+		validateData(invoiceDTO, dtf);
+		
 		String dateStr = invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime();
-		if(!validator.isValid(dateStr)) {
-			throw new DateFormatInvoiceFields(invoiceDTO);
-		}
+
+		
 		LocalDateTime docDate =LocalDateTime.parse(dateStr, dtf);
 		
-		Invoice invoice = new Invoice();
 		invoice.setCurrencyCode(invoiceDTO.getDocumentCurrencyCode());
 		invoice.setCustomSerie(invoiceDTO.getInvoiceTypeCode()+""
 				+ "*"+invoiceDTO.getID().split("-")[0]);
@@ -118,14 +117,20 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		invoice.setPayableAmount(invoiceDTO.getLegalMonetaryTotal().getPayableAmount());
 		invoice.setTaxCode((invoiceDTO.getTaxTotal().getTaxAmount()!=0?taxCodeWithTax:taxCodeWithNoTax));
 		invoice.setInvoiceTypeCode(invoiceDTO.getInvoiceTypeCode());
-		invoice.setJobExecutionID(stepExecution.getJobExecutionId());
 //		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SS");  
 //		Date docDate = formatter.parse(invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime());
 		invoice.setDocDate(docDate);
-		
+		invoice.setProcStatus(InvoiceProcess.SUCCESS);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			invoice.setProcStatus(InvoiceProcess.ERROR);
+			invoice.setProcDesc(e.getMessage().substring(0, 255));
+			log.info("Saving invoice process status with error: {}",invoice);
 
-		invoice.setFileID(invoiceFile.getID());
+		}		
 		executionContext.put("fileProcCounter",fileProcCount+1);
+		
+		
 		
 		return invoice;
 	}
@@ -134,6 +139,31 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		// TODO Auto-generated method stub
 		this.currentFile=file;
 		
+	}
+	
+	public void validateData(InvoiceDTO invoiceDTO,DateTimeFormatter dtf) 
+			throws 
+			DateFormatInvoiceFields
+			, MissingMandadoryInvoiceFields
+	{
+		DateValidator validator = new DateValidatorUsingDateTimeFormatter(dtf);
+		String dateStr = invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime();
+		if(!validator.isValid(dateStr)) {
+			throw new DateFormatInvoiceFields(invoiceDTO,dtf);
+		}
+		
+		if(
+				invoiceDTO.getID()==null 
+			|| invoiceDTO.getID()=="EMPTY" 
+			|| invoiceDTO.getInvoiceTypeCode()==null 
+			|| invoiceDTO.getInvoiceTypeCode()=="EMPTY" 
+			|| invoiceDTO.getAccountingSupplierParty()==null 
+			|| invoiceDTO.getAccountingSupplierParty().getParty()==null 
+			|| invoiceDTO.getAccountingSupplierParty().getParty().getPartyIdentification()==null 
+			|| invoiceDTO.getAccountingSupplierParty().getParty().getPartyIdentification().getID()==null 
+		) {
+			throw new MissingMandadoryInvoiceFields(invoiceDTO);
+		}
 	}
 	
 

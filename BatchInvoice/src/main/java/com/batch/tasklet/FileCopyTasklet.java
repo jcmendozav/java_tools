@@ -16,6 +16,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.util.Assert;
+
+import com.batch.service.FileUtils;
+
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
  
@@ -59,34 +62,40 @@ public class FileCopyTasklet implements Tasklet, InitializingBean,ResourceReload
 	private String dateFormat;
 	
 	private String locationPattern;
+
+	private FileUtils fileUtils;
 	
 	
-	
+	public FileCopyTasklet() {
+		// TODO Auto-generated constructor stub
+		this.fileUtils= new FileUtils();
+	}
 
  
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
          
     	resources = reloadResources(this.locationPattern);
     	log.info("Copying {} files",resources.length);
+        String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
 
         for(Resource r: resources) {
         	
             File fileSource = r.getFile();
-            String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
-            log.debug("Copying: {}",fileSource.getName());
-            String newFileName=
-            		fileSource.getName().split("\\.")[0]+
-            		"_"+
-            		timeStamp+
-            		"."+
-            		fileSource.getName().split("\\.")[1];
-            
-            if(Files.copy(fileSource.toPath()
-            		, (new File(newPath+"/"+newFileName).toPath())
-            		, StandardCopyOption.REPLACE_EXISTING
-            				) != null) {
-            	log.debug("Sucessfull copy of: {}",fileSource.getAbsolutePath());
-            }
+            fileUtils.copyFile(r.getFile(), this.newPath, timeStamp);
+//            log.debug("Copying: {}",fileSource.getName());
+//            String newFileName=
+//            		fileSource.getName().split("\\.")[0]+
+//            		"_"+
+//            		timeStamp+
+//            		"."+
+//            		fileSource.getName().split("\\.")[1];
+//            
+//            if(Files.copy(fileSource.toPath()
+//            		, (new File(newPath+"/"+newFileName).toPath())
+//            		, StandardCopyOption.REPLACE_EXISTING
+//            				) != null) {
+//            	log.debug("Sucessfull copy of: {}",fileSource.getAbsolutePath());
+//            }
   
         }
         return RepeatStatus.FINISHED;

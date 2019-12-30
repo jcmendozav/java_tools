@@ -97,8 +97,8 @@ public class InvoiceDTO {
     public void init()
     {
         this.ID="EMPTY";
-        this.issueDate="EMPTY";
-        this.issueTime="EMPTY";
+        this.issueDate="";
+        this.issueTime="00:00:00";
         this.invoiceTypeCode="EMPTY";
         this.documentCurrencyCode="EMPTY";
         this.accountingSupplierParty=new AccountingSupplierParty();

@@ -12,6 +12,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
+
+import com.batch.service.FileUtils;
  
 public class FileDeletingTasklet implements Tasklet, InitializingBean, ResourceReloader {
 	
@@ -23,6 +25,9 @@ public class FileDeletingTasklet implements Tasklet, InitializingBean, ResourceR
 
 
 	private String locationPattern;
+
+
+	private FileUtils fileUtils;
  
 	public void setLocationPattern(String locationPattern) {
 		this.locationPattern = locationPattern;
@@ -31,16 +36,24 @@ public class FileDeletingTasklet implements Tasklet, InitializingBean, ResourceR
 		return locationPattern;
 	}
 	
+	
+	public FileDeletingTasklet() {
+		// TODO Auto-generated constructor stub
+		this.fileUtils= new FileUtils();
+
+	}
+	
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
     	resources = reloadResources(this.locationPattern);
     	log.info("Deleting {} files",resources.length);
         for(Resource r: resources) {
+        	fileUtils.deleteFile(r.getFile());
         	
-            File file = r.getFile();
-            boolean deleted = file.delete();
-            if (!deleted) {
-                throw new UnexpectedJobExecutionException("Could not delete file " + file.getPath());
-            }
+//            File file = r.getFile();
+//            boolean deleted = file.delete();
+//            if (!deleted) {
+//                throw new UnexpectedJobExecutionException("Could not delete file " + file.getPath());
+//            }
         }
         return RepeatStatus.FINISHED;
     }

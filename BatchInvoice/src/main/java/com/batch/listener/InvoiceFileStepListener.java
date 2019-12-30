@@ -1,9 +1,12 @@
 package com.batch.listener;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +18,8 @@ import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -22,6 +27,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import com.batch.model.InvoiceFile;
 import com.batch.repository.InvoiceFileRepository;
+import com.batch.service.FileUtils;
+
 
 public class InvoiceFileStepListener implements StepExecutionListener {
 
@@ -33,6 +40,20 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 	List<InvoiceFile> items;
 	InvoiceFileRepository repository;
 	private ExecutionContext executionContext;
+	
+	private FileUtils fileUtils;
+
+	private String backupPath;
+	
+	public InvoiceFileStepListener() {
+		// TODO Auto-generated constructor stub
+		fileUtils = new FileUtils();
+	}
+	
+	public void setBackupPath(String backupPath) {
+		this.backupPath = backupPath;
+	}
+	
 	
 	
 	public void setItems(List<InvoiceFile> items) {
@@ -55,7 +76,9 @@ public class InvoiceFileStepListener implements StepExecutionListener {
     	executionContext.putLong("jobID", stepExecution.getJobExecution().getId());	
     	InvoiceFile invoiceFile = new InvoiceFile();
     	Resource resource = new FileSystemResource(filePath);
+//        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
     	int fileID=0;
+    	
     	try {
     		
     		invoiceFile.setUuid(uuid);
@@ -68,9 +91,12 @@ public class InvoiceFileStepListener implements StepExecutionListener {
         	executionContext.putInt("fileID", fileID);	
         	executionContext.put("invoiceFile", invoiceFile);	
 
+        	fileUtils.backUpFile(resource.getFile(), this.backupPath);
+
+        	
     	} catch (Exception e) {
 			// TODO Auto-generated catch block
-			log.error(e.getMessage(),e);;
+			log.error(e.getMessage(),e);
 		}
 
 		log.debug("invoiceFile fileID: {}",fileID);
@@ -85,8 +111,11 @@ public class InvoiceFileStepListener implements StepExecutionListener {
 		
 		int fileProcCount=stepExecution.getExecutionContext().getInt("fileProcCounter");
 		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
+		String filePath=executionContext.getString("filePath");
+
     	invoiceFile.setObjCounter(fileProcCount);
     	repository.updateObjCounter(invoiceFile);
+    	fileUtils.deleteFile(new File(filePath));
 		return ExitStatus.COMPLETED;
 	}
 

@@ -93,7 +93,7 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		//DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss.SS");
 		
 		DateTimeFormatter dtf = new DateTimeFormatterBuilder()
-			    .appendPattern("yyyy-MM-ddHH:mm:ss")
+			    .appendPattern("[yyyy-MM-ddHH:mm:ss][yyyy-MM-dd]")
 			    .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
 			    .toFormatter();
 		

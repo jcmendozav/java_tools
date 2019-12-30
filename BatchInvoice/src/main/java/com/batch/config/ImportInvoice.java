@@ -12,12 +12,14 @@ import java.util.Date;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -66,6 +68,7 @@ import org.springframework.util.StringUtils;
 import com.batch.constant.InvoiceProcess;
 import com.batch.listener.InvoiceFileStepListener;
 import com.batch.listener.JobCompletionNotificationListener;
+import com.batch.listener.UnzipListener;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 import com.batch.model.InvoiceExpDTO;
@@ -238,6 +241,7 @@ public class ImportInvoice {
 		
 		InvoiceFileStepListener listener = new InvoiceFileStepListener();
 		listener.setDataSource(dataSource());
+		listener.setBackupPath(backupPath);
 		return stepBuilderFactory.get("uploadFileContentStep")
 				.<InvoiceDTO,Invoice>chunk(importChunk)
 				.reader(reader(null))
@@ -280,7 +284,12 @@ public class ImportInvoice {
     @Bean
     public Step upzipStep() {
     	UnzipTasklet task = new UnzipTasklet(this.inputPath, this.zipInputResources);
-        return stepBuilderFactory.get("upzipStep")
+    	
+    	UnzipListener unzipListener = new UnzipListener();
+    	unzipListener.setBackupPath(backupPath);
+    	unzipListener.setResources(this.zipInputResources);
+		return stepBuilderFactory.get("upzipStep")
+        		.listener(unzipListener )
                 .tasklet(task)
                 .build();
     }
@@ -424,34 +433,6 @@ public class ImportInvoice {
 
 			) {
 		
-//		String [] fieldNames = new String[] {
-//				"fileID"
-//				,"procStatus"
-//				,"procDesc"
-//				,"fileName"
-//				,"filePath"
-//				,"partyId"
-//				,"vendorId"
-//				,"customSerie"
-//				,"numberSerie"
-//				,"issueTimeStamp"
-//				,"issueTime"
-//				,"issueDate"
-//				,"currencyCode"
-//				,"lineExtensionAmount"
-//				,"taxAmount"
-//				,"payableAmount"
-//				,"taxCode"
-//				,"invoiceTypeCode"
-//				,"docDate"
-//				,"jobExecutionID"
-//				,"ID"
-//				,"invoiceId"
-//				,"status"
-//				,"lastUpdatedDate"
-//				,"creationDate"
-//
-//				};
 		
 		String[] fieldNames = exportFieldNames.split(exportDelimiter);
         FlatFileItemWriter<Invoice> writer = new FlatFileItemWriter<>();

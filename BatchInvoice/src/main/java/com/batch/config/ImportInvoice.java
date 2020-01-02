@@ -12,29 +12,22 @@ import java.util.Date;
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;import org.springframework.batch.core.ExitStatus;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.job.flow.State;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.core.step.tasklet.Tasklet;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.ParseException;
 import org.springframework.batch.item.UnexpectedInputException;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileHeaderCallback;
 import org.springframework.batch.item.file.FlatFileItemWriter;
@@ -42,25 +35,19 @@ import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.batch.item.xml.StaxEventItemReader;
-import org.springframework.batch.repeat.CompletionPolicy;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.StringUtils;
@@ -75,9 +62,12 @@ import com.batch.model.InvoiceExpDTO;
 import com.batch.partitioner.CustomMultiResourcePartitioner;
 import com.batch.procesor.InvoiceItemExportProcessor;
 import com.batch.procesor.InvoiceItemImportProcessor;
-import com.batch.reader.InvoiceExpRowMapper;
-import com.batch.reader.InvoiceRowMapper;
+import com.batch.repository.InvoiceExpRowMapper;
+import com.batch.repository.InvoiceRowMapper;
 import com.batch.repository.invoiceSQL;
+import com.batch.service.MapUploadUtil;
+import com.batch.service.PostKeyConfUpload;
+import com.batch.service.VendorMapUpload;
 import com.batch.skipPolicy.ImportInvoiceSkipPolicy;
 import com.batch.tasklet.FileCopyTasklet;
 import com.batch.tasklet.FileDeletingTasklet;
@@ -127,6 +117,16 @@ public class ImportInvoice {
 
 	@Value("${batch.invoice.import.filesToDelete}")
 	private String filesToDeleteStr;
+	
+	
+	@Value("${batch.invoice.map.postKeyConf}")
+	private Resource postKeyConfMapRes;
+	
+	@Value("${batch.invoice.map.VendorMap}")
+	private Resource vendorMapRes;
+	
+	@Value("${batch.invoice.map.delimiter}")
+	private String mapDelimiter;
 
 	@Value("${batch.invoice.dateFormat}")
 	private String dateFormat;
@@ -174,7 +174,65 @@ public class ImportInvoice {
 	    return firstDataSourceProperties().initializeDataSourceBuilder().build();
 	}
 	
+	
+	/*
+	 * job: upload maps 
+	 * start
+	 * */
+	
+//	public Step uploadVendorMap() {
+//
+//		MapUploadUtil vm = new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath);
+//		return stepBuilderFactory
+//				.get("uploadVendorMap")
+//				.tasklet(new Tasklet() {
+//					@Override
+//					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+//						// TODO Auto-generated method stub
+//						vm.upload();
+//						return RepeatStatus.FINISHED;
+//					}
+//				}).build();
+//	}
+//	
+//	public Step uploadPostKeyConf() {
+//		
+//		MapUploadUtil vm = new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter,backupPath);
+//		return stepBuilderFactory
+//				.get("uploadVendorMap")
+//				.tasklet(new Tasklet() {
+//					@Override
+//					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+//						// TODO Auto-generated method stub
+//						vm.upload();
+//						return RepeatStatus.FINISHED;
+//					}
+//				}).build();
+//	}
 
+
+	
+	public Step uploadMap(MapUploadUtil vm) {
+
+//		MapUploadUtil vm = new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath);
+		log.info("Uploading map ");
+		return stepBuilderFactory
+				.get("uploadMap")
+				.allowStartIfComplete(true)
+				.tasklet(new Tasklet() {
+					@Override
+					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+						// TODO Auto-generated method stub
+						vm.upload();
+						return RepeatStatus.FINISHED;
+					}
+				}).build();
+	}
+	
+	/*
+	 * job: upload maps
+	 * end 
+	 * */
 	
     @Bean
     @StepScope
@@ -474,7 +532,9 @@ public class ImportInvoice {
         		.get("ImportInvoiceJob")
         		.listener(listener)
         		.incrementer(new RunIdIncrementer())
-        		.start(upzipStep())
+        		.start(uploadMap(new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath)))
+        		.next(uploadMap(new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter, backupPath)))
+        		.next(upzipStep())
         		.next(backUpStep())
         		.next(partitionStep())
 //        		.on("FAILED").end()

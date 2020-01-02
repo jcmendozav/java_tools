@@ -1,5 +1,6 @@
 package com.batch;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -8,6 +9,12 @@ class BatchInvoiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+	}
+	
+	@Test
+	@DisplayName("Validate Configuration")
+	void validateConfiguration() {
+		
 	}
 
 }

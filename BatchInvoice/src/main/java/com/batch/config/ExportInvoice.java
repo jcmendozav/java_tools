@@ -30,8 +30,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceExpDTO;
 import com.batch.procesor.InvoiceItemExportProcessor;
-import com.batch.reader.InvoiceExpRowMapper;
-import com.batch.reader.InvoiceRowMapper;
+import com.batch.repository.InvoiceExpRowMapper;
+import com.batch.repository.InvoiceRowMapper;
 import com.batch.writer.InvoiceItemExportWriter;
 
 //@Configuration

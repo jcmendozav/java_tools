@@ -83,7 +83,7 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
 	 
 	    File fileTemplate = new File(fileTemplatePath);
         String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
-        System.out.println("Copying: "+fileTemplate.getName());
+//        System.out.println("Copying: "+fileTemplate.getName());
         String newFileName=
         		fileTemplate.getName().split("\\.")[0]+
         		"_"+

@@ -8,6 +8,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.*;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.Resource;
 
 
 
@@ -19,6 +20,12 @@ public class ReplaceTableInfo implements Tasklet, InitializingBean{
 	
 	String sql;
 	
+	Resource mapResource;
+	
+	
+	public void setMapResource(Resource mapResource) {
+		this.mapResource = mapResource;
+	}
 	
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;

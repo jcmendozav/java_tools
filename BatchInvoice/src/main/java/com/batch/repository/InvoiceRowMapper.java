@@ -1,4 +1,4 @@
-package com.batch.reader;
+package com.batch.repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -11,6 +11,7 @@ public interface VendorMapSQL {
 			+ "party_id"
 			+ ",vendor_id"
 			+ ",vendor_name"
+			+ ",assign_no"
 
 			+ ") "
 			+ "values "
@@ -18,6 +19,7 @@ public interface VendorMapSQL {
 			+ ":partyId"
 			+ ",:vendorId"
 			+ ",:vendorName"
+			+ ",:assignNo"
 			+ ")"		;
 	
 	public final String DELETE_ALL = "DELETE VENDOR_MAP ";

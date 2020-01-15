@@ -18,6 +18,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceFile;
+import com.batch.repository.InvoiceFileRepository;
+import com.batch.repository.InvoiceRowRepository;
 
 public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 	
@@ -28,6 +30,8 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
     private NamedParameterJdbcTemplate jdbcTemplate;
 
 	private StepExecution stepExecution;
+	
+	private InvoiceRowRepository repository;
 
 	@BeforeStep
 	public void saveStepExecution(StepExecution stepExecution) {
@@ -35,66 +39,15 @@ public class InvoiceItemImportWriter implements ItemWriter<Invoice> {
 	}
     public InvoiceItemImportWriter(DataSource dataSource) {
         this.jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        this.repository= new InvoiceRowRepository(dataSource);
     }
 	@Override
 	public void write(List<? extends Invoice> items) throws Exception {
 		ExecutionContext executionContext = this.stepExecution.getExecutionContext();
-		int fileProcCount=executionContext.getInt("fileProcCounter");
-//		log.info(
-//				"File Info from writer: "
-//						+ ",fileName:{}"
-//						+ ",fileProcCounter:{}"
-//						+ ",items:{}"
-//						,executionContext.getString("fileName")
-//						,fileProcCount
-//						,items.size()
-//				//+ ", processing item = " + invoiceDTO.toString() 
-//				);
-		
+
 		log.info("Wrinting invoice rows: {}",Arrays.toString(items.toArray()));
 		
-		
-		SqlParameterSource[] batch = SqlParameterSourceUtils.createBatch(items.toArray());
-		int[] updateCounts = jdbcTemplate.batchUpdate(
-				"INSERT INTO invoice"
-						+ "("
-						+ "custom_serie"
-						+ ",issue_date"
-						+ ",issue_time"
-						+ ",number_serie"
-						+ ",ta"
-						+ ",pa"
-						+ ",lea"
-						+ ",party_id"
-						+ ",tax_code"
-						+ ",invoice_type_code"
-						+ ",doc_date"
-						+ ",job_execution_id"
-						+ ",file_id"
-						+ ",currency_code"
-						+ ",proc_status"
-						+ ",proc_desc"
-						+ ") "
-						+ "values "
-						+ "("
-						+ ":customSerie"
-						+ ",:issueDate"
-						+ ",:issueTime"
-						+ ",:numberSerie"
-						+ ",:taxAmount"
-						+ ",:payableAmount"
-						+ ",:lineExtensionAmount"
-						+ ",:partyId"
-						+ ",:taxCode"
-						+ ",:invoiceTypeCode"
-						+ ",:docDate"
-						+ ",:jobExecutionID"
-						+ ",:fileID"
-						+ ",:currencyCode"
-						+ ",:procStatus"
-						+ ",:procDesc"
-						+ ")"				
-				, batch);
+		int[] updateCounts = repository.create(items);
 		log.info("updateCounts: {}",Arrays.toString(updateCounts));
 	}
 

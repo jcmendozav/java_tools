@@ -48,6 +48,8 @@ public class InvoiceExpRowMapper implements RowMapper<InvoiceExpDTO> {
 		invoice.setItmTxt(rs.getString("itm_txt"));
 		invoice.setTaxCode(rs.getString("tax_code"));
 		invoice.setFileId(rs.getInt("file_id"));
+//		invoice.setPhoneDescItem(rs.getString("phone_desc_item"));
+//		invoice.setUniquePhoneItem(rs.getString("unique_phone_item"));
 		
 		return invoice ;
 	}

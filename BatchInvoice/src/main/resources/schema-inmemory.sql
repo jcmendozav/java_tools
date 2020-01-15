@@ -35,7 +35,10 @@ CREATE TABLE  invoice (
     last_update_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     creationdate timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     proc_status numeric DEFAULT 0,
-    proc_desc character varying(256)
+    proc_desc character varying(256),
+    unique_phone_item character varying(64),    
+    phone_desc_item character varying(256)
+    
 );
 
 
@@ -128,5 +131,28 @@ CREATE TABLE  vendor_map (
     party_id character varying(16),
     vendor_id character varying(16),
     vendor_name character varying(128),
+    assign_no character varying(128),
+    creationdate timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE SEQUENCE  phone_ccntr_map_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+
+--
+-- Name: vendor_map; Type: TABLE; Schema: public; Owner: batchuser
+--
+
+CREATE TABLE  phone_ccntr_map (
+    id integer DEFAULT phone_ccntr_map_id_seq.nextval NOT NULL,
+    phone character varying(64),
+    ccntr character varying(16),
+    full_name character varying(128),
     creationdate timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );

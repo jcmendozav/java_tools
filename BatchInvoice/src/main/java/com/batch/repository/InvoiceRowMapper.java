@@ -49,6 +49,9 @@ public class InvoiceRowMapper implements RowMapper<Invoice> {
 		invoice.setProcStatus(rs.getInt("proc_status"));
 		invoice.setProcDesc(rs.getString("proc_desc"));
 		invoice.setFilePath(rs.getString("file_path"));
+		invoice.setPhoneDescItem(rs.getString("phone_desc_item"));
+		invoice.setUniquePhoneItem(rs.getString("unique_phone_item"));
+		
 		
 		return invoice ;
 	}

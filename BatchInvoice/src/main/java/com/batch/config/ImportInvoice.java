@@ -59,15 +59,20 @@ import com.batch.listener.UnzipListener;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 import com.batch.model.InvoiceExpDTO;
+import com.batch.model.map.PhoneCcntr;
+import com.batch.model.map.PostKeyConf;
+import com.batch.model.map.VendorMap;
 import com.batch.partitioner.CustomMultiResourcePartitioner;
 import com.batch.procesor.InvoiceItemExportProcessor;
 import com.batch.procesor.InvoiceItemImportProcessor;
 import com.batch.repository.InvoiceExpRowMapper;
 import com.batch.repository.InvoiceRowMapper;
-import com.batch.repository.invoiceSQL;
+import com.batch.repository.PhoneCcntrSQL;
+import com.batch.repository.PostKeyConfSQL;
+import com.batch.repository.VendorMapSQL;
+import com.batch.repository.InvoiceSQL;
+import com.batch.service.GenMapUpload;
 import com.batch.service.MapUploadUtil;
-import com.batch.service.PostKeyConfUpload;
-import com.batch.service.VendorMapUpload;
 import com.batch.skipPolicy.ImportInvoiceSkipPolicy;
 import com.batch.tasklet.FileCopyTasklet;
 import com.batch.tasklet.FileDeletingTasklet;
@@ -125,6 +130,9 @@ public class ImportInvoice {
 	@Value("${batch.invoice.map.VendorMap}")
 	private Resource vendorMapRes;
 	
+	@Value("${batch.invoice.map.PhoneCcnrtMap}")
+	private Resource PhoneCcnrtMapRes;
+	
 	@Value("${batch.invoice.map.delimiter}")
 	private String mapDelimiter;
 
@@ -158,7 +166,22 @@ public class ImportInvoice {
 	
 	@Value("${batch.invoice.export.fieldNames}")
 	private String exportFieldNames;
+	
+	
+	@Value("(\\d{9,11})(?!.*\\d)")
+	private String msisdnRegex;
+
+	@Value("${batch.invoice.import.gridSize}")
+	private int gridSize;
 		
+	
+	/*
+	 * this bean must be primary due to this issue:
+	 * 
+	 * Parameter 1 of constructor in org.springframework.boot.autoconfigure.jdbc.DataSourceInitializerInvoker required a single bean, but 2 were found:
+	- firstDataSourceProperties: defined by method 'firstDataSourceProperties' in class path resource [com/batch/config/ImportInvoice.class]
+	- spring.datasource-org.springframework.boot.autoconfigure.jdbc.DataSourceProperties: defined in null
+	 * */
 	@Bean
 	@Primary
 	//@ConfigurationProperties("spring.datasource")
@@ -168,8 +191,8 @@ public class ImportInvoice {
 	}
 
 	@Bean
-	@Primary
-//@ConfigurationProperties("app.datasource.first")
+	//@Primary
+	//@ConfigurationProperties("app.datasource.first")
 	public DataSource dataSource() {
 	    return firstDataSourceProperties().initializeDataSourceBuilder().build();
 	}
@@ -180,36 +203,6 @@ public class ImportInvoice {
 	 * start
 	 * */
 	
-//	public Step uploadVendorMap() {
-//
-//		MapUploadUtil vm = new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath);
-//		return stepBuilderFactory
-//				.get("uploadVendorMap")
-//				.tasklet(new Tasklet() {
-//					@Override
-//					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-//						// TODO Auto-generated method stub
-//						vm.upload();
-//						return RepeatStatus.FINISHED;
-//					}
-//				}).build();
-//	}
-//	
-//	public Step uploadPostKeyConf() {
-//		
-//		MapUploadUtil vm = new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter,backupPath);
-//		return stepBuilderFactory
-//				.get("uploadVendorMap")
-//				.tasklet(new Tasklet() {
-//					@Override
-//					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-//						// TODO Auto-generated method stub
-//						vm.upload();
-//						return RepeatStatus.FINISHED;
-//					}
-//				}).build();
-//	}
-
 
 	
 	public Step uploadMap(MapUploadUtil vm) {
@@ -264,6 +257,7 @@ public class ImportInvoice {
 		InvoiceItemImportProcessor invoiceItemProcessor = new InvoiceItemImportProcessor();
 		invoiceItemProcessor.setResources(inputResources);
 		invoiceItemProcessor.setProcessingFileName(fileName);
+		invoiceItemProcessor.setMsisdnRegex(msisdnRegex);
 		return invoiceItemProcessor;
 	}
 	
@@ -358,8 +352,10 @@ public class ImportInvoice {
     public Step partitionStep() throws UnexpectedInputException, MalformedURLException, ParseException {
         return stepBuilderFactory.get("partitionStep")
           .partitioner("slaveStep", partitioner())
+          
           .step(uploadFileContentStep())
           .taskExecutor(asynctaskExecutor()).taskExecutor(threadpooltaskExecutor())
+          .gridSize(gridSize)
           .build();
     }
     
@@ -407,7 +403,7 @@ public class ImportInvoice {
 			 ){
 	  JdbcCursorItemReader<InvoiceExpDTO> reader = new JdbcCursorItemReader<InvoiceExpDTO>();
 	  reader.setDataSource(dataSource());
-	  reader.setSql(invoiceSQL.FETCH_REPORT_BY_JOB);
+	  reader.setSql(InvoiceSQL.FETCH_REPORT_BY_JOB);
 	  reader.setPreparedStatementSetter(new PreparedStatementSetter() {
 		
 		@Override
@@ -450,6 +446,12 @@ public class ImportInvoice {
 				.build();
 	}
 	
+	/*
+	 * start
+	 * stepExportImportResultStep
+	 * 
+	 * 
+	 * */
 	
 	@Bean
 	public Step stepExportImportResultStep() {
@@ -471,7 +473,7 @@ public class ImportInvoice {
     		) {
   	  JdbcCursorItemReader<Invoice> reader = new JdbcCursorItemReader<>();
   	  reader.setDataSource(dataSource());
-  	  reader.setSql(invoiceSQL.FETCH_FILES_BY_JOB);
+  	  reader.setSql(InvoiceSQL.FETCH_FILES_BY_JOB);
   	  reader.setPreparedStatementSetter(new PreparedStatementSetter() {
 		
 		@Override
@@ -522,6 +524,15 @@ public class ImportInvoice {
 		return writer;
 	}
 
+	
+	/*
+	 * end
+	 * stepExportImportResultStep
+	 * 
+	 * 
+	 * */
+	
+	
 	@Bean
     public Job ImportInvoiceJob() throws UnexpectedInputException, MalformedURLException, ParseException {
     	
@@ -532,8 +543,14 @@ public class ImportInvoice {
         		.get("ImportInvoiceJob")
         		.listener(listener)
         		.incrementer(new RunIdIncrementer())
-        		.start(uploadMap(new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath)))
-        		.next(uploadMap(new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter, backupPath)))
+        		.start(
+        				//uploadMap(new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath))
+                		uploadMap(new GenMapUpload<VendorMap>(dataSource(),VendorMap.class,vendorMapRes,mapDelimiter, backupPath, VendorMapSQL.CREATE, VendorMapSQL.DELETE_ALL))
+
+        				)
+        		//.next(uploadMap(new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter, backupPath)))
+        		.next(uploadMap(new GenMapUpload<PostKeyConf>(dataSource(),PostKeyConf.class,postKeyConfMapRes,mapDelimiter, backupPath, PostKeyConfSQL.CREATE, PostKeyConfSQL.DELETE_ALL)))
+        		.next(uploadMap(new GenMapUpload<PhoneCcntr>(dataSource(),PhoneCcntr.class,PhoneCcnrtMapRes,mapDelimiter, backupPath, PhoneCcntrSQL.CREATE, PhoneCcntrSQL.DELETE_ALL)))
         		.next(upzipStep())
         		.next(backUpStep())
         		.next(partitionStep())

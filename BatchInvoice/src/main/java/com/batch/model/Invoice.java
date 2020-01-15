@@ -1,10 +1,8 @@
 package com.batch.model;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Date;
-import java.util.Set;
+import java.util.List;
+
 
 public class Invoice {
 	
@@ -187,8 +185,35 @@ public class Invoice {
 	public LocalDateTime getCreationDate() {
 		return creationDate;
 	}
+
+	public void setPhoneItemList(List<String> phoneItemList) {
+		this.phoneItemList = phoneItemList;
+	}
 	
+	public List<String> getPhoneItemList() {
+		return phoneItemList;
+	}
 	
+	public void setUniquePhoneItem(String uniquePhoneItem) {
+		// TODO Auto-generated method stub
+		this.uniquePhoneItem=uniquePhoneItem;
+	}
+	
+	public String getUniquePhoneItem() {
+		return uniquePhoneItem;
+	}
+
+
+	public void setPhoneDescItem(String phoneDescItem) {
+		this.phoneDescItem = phoneDescItem;
+	}
+	
+	public String getPhoneDescItem() {
+		return phoneDescItem;
+	}
+
+
+
 
 	@Override
 	public String toString() {
@@ -200,8 +225,11 @@ public class Invoice {
 				+ jobExecutionID + ", fileID=" + fileID + ", fileName=" + fileName + ", filePath=" + filePath
 				+ ", procStatus=" + procStatus + ", procDesc=" + procDesc + ", ID=" + ID + ", invoiceId=" + invoiceId
 				+ ", status=" + status + ", lastUpdatedDate=" + lastUpdatedDate + ", creationDate=" + creationDate
-				+ "]";
+				+ ", phoneItemList=" + phoneItemList + ", uniquePhoneItem=" + uniquePhoneItem + "]";
 	}
+
+
+
 
 
 
@@ -230,6 +258,11 @@ public class Invoice {
 	private int status;
 	private LocalDateTime lastUpdatedDate;
 	private LocalDateTime creationDate;
+	private List<String> phoneItemList;
+	private String uniquePhoneItem;
+	private String phoneDescItem;
+
+
 	
 
 

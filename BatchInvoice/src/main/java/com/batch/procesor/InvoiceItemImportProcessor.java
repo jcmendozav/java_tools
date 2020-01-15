@@ -6,7 +6,16 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +33,7 @@ import com.batch.exception.MissingMandadoryInvoiceFields;
 import com.batch.model.Invoice;
 import com.batch.model.InvoiceDTO;
 import com.batch.model.InvoiceFile;
+import com.batch.model.InvoiceLine;
 import com.batch.util.DateValidator;
 import com.batch.util.DateValidatorUsingDateTimeFormatter;
 
@@ -43,9 +53,26 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 	
 	private Resource[] resources;
 	
-
-
 	private String currentFile;
+	
+	
+	//@Value("Servicio:(\\d{9,11})")
+	@Value("(\\d{9,11})(?!.*\\d)")
+	private String msisdnRegex;
+	
+	Pattern msisdnPattern ;
+	
+	public InvoiceItemImportProcessor() {
+		// TODO Auto-generated constructor stub
+
+	}
+	
+	public void setMsisdnRegex(String msisdnRegex) {
+		log.info("msisdnRegex: {}",msisdnRegex);
+		this.msisdnRegex=msisdnRegex;
+		this.msisdnPattern = Pattern.compile(msisdnRegex);
+	}
+
 	
 	public void setResources(Resource[] resources) {
 		this.resources = resources;
@@ -56,6 +83,7 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 	@BeforeStep
 	public void saveStepExecution(StepExecution stepExecution) {
 		this.stepExecution = stepExecution;
+		
 	}
 	
 
@@ -72,16 +100,7 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		
 		
 		invoiceDTO.setFilePath(filePath);
-		
-//		InvoiceFile invoiceFile = (InvoiceFile) executionContext.get("invoiceFile"); 
-//		log.info("InvoiceFile from processor "
-//				+ ",invoiceFile: {}"
-//				+ ",fileID: {}"
-//				+ ",jobID: {}"
-//				,invoiceFile
-//				,stepExecution.getExecutionContext().getInt("fileID")
-//				,stepExecution.getJobExecutionId()
-//				);
+
 		Invoice invoice = new Invoice();
 		invoice.setFilePath(invoiceDTO.getFilePath());
 		invoice.setJobExecutionID(stepExecution.getJobExecutionId());
@@ -117,6 +136,14 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		invoice.setPayableAmount(invoiceDTO.getLegalMonetaryTotal().getPayableAmount());
 		invoice.setTaxCode((invoiceDTO.getTaxTotal().getTaxAmount()!=0?taxCodeWithTax:taxCodeWithNoTax));
 		invoice.setInvoiceTypeCode(invoiceDTO.getInvoiceTypeCode());
+		List<String> phoneList = getDescPhoneNumber(
+				invoiceDTO.getInvoiceLines().stream().map(x -> x.getItem().getDescription()).collect(Collectors.toList()), 
+				msisdnPattern);
+		invoice.setPhoneItemList(phoneList);
+		invoice.setUniquePhoneItem((phoneList.size()==1?phoneList.get(0):"INVALID_UNIQUE_VALUE"));
+		String phoneDescItem = phoneList.toString();
+		phoneDescItem = phoneDescItem.substring(0, phoneDescItem.length()<255? phoneDescItem.length(): 255);
+		invoice.setPhoneDescItem(phoneList.size()!=1?phoneDescItem:"");
 //		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-ddHH:mm:ss.SS");  
 //		Date docDate = formatter.parse(invoiceDTO.getIssueDate()+invoiceDTO.getIssueTime());
 		invoice.setDocDate(docDate);
@@ -134,6 +161,26 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 		
 		return invoice;
 	}
+
+	private List<String> getDescPhoneNumber(List<String> descList, Pattern pattern) {
+		// TODO Auto-generated method stub
+		HashSet<String> phoneSet = new HashSet<String>();
+		
+		for(String desc : descList) {
+			//String msisdn = line.getItem().getDescription();
+			Matcher matcher = pattern.matcher(desc);
+			if(matcher.find()) {
+				phoneSet.add(matcher.group());
+			}
+			//phoneSet.add(msisdn);
+		}
+		
+		return new ArrayList<String>(phoneSet);
+	}
+
+
+
+
 
 	public void setProcessingFileName(String file) {
 		// TODO Auto-generated method stub

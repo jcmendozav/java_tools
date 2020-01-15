@@ -196,6 +196,9 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
      * Profit ctr	28 -- Empty
      * Assign. No	29
      * Itm txt	30
+     * Id trad prtn	31 -- Empty
+     * Tax code 32
+
 
 	     * */
 	    for (InvoiceExpDTO item : items) {
@@ -259,6 +262,9 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
 		 // Itm txt	30
 	        c = r.createCell(30);
 	        c.setCellValue(item.getItmTxt());	
+	        // tax code 32
+	        c = r.createCell(32);
+	        c.setCellValue(item.getTaxCode());	
 
 		}
 	}

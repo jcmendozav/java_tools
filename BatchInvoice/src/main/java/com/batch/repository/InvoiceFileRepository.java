@@ -21,9 +21,9 @@ public class InvoiceFileRepository {
 	private static final Logger log = LoggerFactory.getLogger(InvoiceFileRepository.class);
 
 
-	private final String INSERT_SQL = invoiceSQL.INSERT_SQL;
+	private final String INSERT_SQL = InvoiceSQL.INSERT_SQL;
 	
-	private final String UPDATE_SQL = invoiceSQL.UPDATE_SQL;
+	private final String UPDATE_SQL = InvoiceSQL.UPDATE_SQL;
 
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	

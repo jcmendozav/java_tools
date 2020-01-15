@@ -213,6 +213,22 @@ public class InvoiceExpDTO {
 		this.itmTxt = itmTxt;
 	}
 
+	public void setPhoneDescItem(String phoneDescItem) {
+		this.phoneDescItem = phoneDescItem;
+	}
+	public String getPhoneDescItem() {
+		return phoneDescItem;
+	}
+	
+	public void setUniquePhoneItem(String uniquePhoneItem) {
+		this.uniquePhoneItem = uniquePhoneItem;
+	}
+	public String getUniquePhoneItem() {
+		return uniquePhoneItem;
+	}
+	
+	
+	
 
 	private Date baseDate;
 	private String postKey;
@@ -250,6 +266,7 @@ public class InvoiceExpDTO {
 	String taxCode;
 	String invoiceTypeCode;
 	private Date docDate;
-
+	private String uniquePhoneItem;
+	private String phoneDescItem;
 
 }

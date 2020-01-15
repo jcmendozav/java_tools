@@ -1,6 +1,8 @@
 package com.batch.model.map;
 
-public class PostKeyConf {
+import java.util.regex.Pattern;
+
+public class PostKeyConf implements GenModelMap {
 	public String getAmntLocalType() {
 		return amntLocalType;
 	}
@@ -29,21 +31,16 @@ public class PostKeyConf {
 	String docTypeCode;
 	String postKey;
 	
-	public PostKeyConf(String[] fields) {
-		// TODO Auto-generated constructor stub
-		init(fields);
-
-	}
 	
-	
-
-	public PostKeyConf(String line, String delimiter) {
+	@Override
+	public void init(String line, String delimiter) {
 		// TODO Auto-generated constructor stub
 		
-		String[] fields = line.split(delimiter);
+		String[] fields = line.split(Pattern.quote(delimiter),-1);
 		init(fields);
 	}
 	
+	@Override
 	public void init(String[] fields){
 
 		this.amntLocalType=fields[0];

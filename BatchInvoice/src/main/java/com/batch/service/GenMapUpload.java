@@ -15,18 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 
-import com.batch.model.map.PostKeyConf;
-import com.batch.model.map.VendorMap;
-import com.batch.repository.PostKeyConfRepository;
+import com.batch.model.map.GenModelMap;
+import com.batch.repository.GenMapRepository;
 
 
-public class PostKeyConfUpload implements MapUploadUtil {
+public class GenMapUpload<T extends GenModelMap> implements MapUploadUtil  {
 	
-	
-	private static final Logger log = LoggerFactory.getLogger(PostKeyConfUpload.class);
+    private Class<T> genModelMap;
+
+	private static final Logger log = LoggerFactory.getLogger(GenMapUpload.class);
 
 	
-	PostKeyConfRepository repository; 
+	GenMapRepository repository; 
 	
 	Resource resource;
 	
@@ -35,36 +35,51 @@ public class PostKeyConfUpload implements MapUploadUtil {
 	
 	FileUtils fileUtils;
 	
-	public PostKeyConfUpload(DataSource dataSource, Resource resource, String delimiter, String backupPath ) {
-		this.repository = new PostKeyConfRepository(dataSource);
+	public GenMapUpload(DataSource dataSource
+			,Class<T> genModelMap
+			, Resource resource
+			, String delimiter
+			, String backupPath
+			, String SQL_CREATE
+			, String SQL_DELETE_ALL ) {
+		this.repository = new GenMapRepository(dataSource,SQL_CREATE,SQL_DELETE_ALL);
 		this.resource=resource;
 		this.delimiter=delimiter;
 		this.fileUtils= new FileUtils();
 		this.backupPath=backupPath;
+		this.genModelMap=genModelMap;
+		
+		log.info("Class type: {}",genModelMap.getClass().getName());
 	}
 
-	@Override
 	public int[] create(List items) {
 		// TODO Auto-generated method stub
 		return repository.create(items);
 	}
 
-	@Override
 	public int deleteAll() {
 		// TODO Auto-generated method stub
 		return repository.deleteAll();
 	}
 
-	@Override
-	public List getElementsFromResource() {
+	public List<T> getElementsFromResource() {
 		// TODO Auto-generated method stub
 		Path path=null;
-		List<PostKeyConf> items = null;
+		List<T> items = null;
 		try {
 			path = Paths.get(this.resource.getURI());
 			Stream<String> lines = Files.lines(path,Charset.forName("Cp1252"));
-			items = lines.skip(1).map(line -> 
-				new PostKeyConf(line,this.delimiter)
+			items = lines.skip(1).map(line -> {
+				T t=null;
+				try {
+					t = genModelMap.newInstance();
+					t.init(line,delimiter);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					log.error("Problem procesing line: {}, ERROR: {}",line,e);
+				}
+				return t;
+			}
 			 ).collect(Collectors.toList());
 			lines.close();
 			
@@ -80,7 +95,7 @@ public class PostKeyConfUpload implements MapUploadUtil {
 	@Override
 	public void upload() {
 		// TODO Auto-generated method stub
-		log.info("postkey upload start: {}, {}",resource.getFilename(),resource.exists());
+		log.info("Generic upload start: {}, {}",resource.getFilename(),resource.exists());
 		if(this.resource.exists()) {
 			try {
 				//fileUtils.backUpFile(this.resource.getFile(), this.backupPath);
@@ -92,7 +107,7 @@ public class PostKeyConfUpload implements MapUploadUtil {
 				log.error("Error uploading file: ",e);
 			}			
 		}
-		log.info("postkey upload end");
+		log.info("Generic Upload end, {}",genModelMap.getClass().getName());
 
 
 	}

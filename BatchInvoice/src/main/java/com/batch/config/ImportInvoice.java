@@ -190,8 +190,12 @@ public class ImportInvoice {
 	    return new DataSourceProperties();
 	}
 
+	/*
+	 * Without this primary, we are going to enter in a circular dependency when running from command line
+	 * */
+	
 	@Bean
-	//@Primary
+	@Primary
 	//@ConfigurationProperties("app.datasource.first")
 	public DataSource dataSource() {
 	    return firstDataSourceProperties().initializeDataSourceBuilder().build();

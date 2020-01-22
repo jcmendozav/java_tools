@@ -14,6 +14,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -21,7 +25,11 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.flow.State;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -45,6 +53,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -93,6 +103,9 @@ public class ImportInvoice {
 	public JobBuilderFactory jobBuilderFactory;
 	@Autowired
 	public StepBuilderFactory stepBuilderFactory;
+	
+	@Autowired
+	private JobLauncher jobLauncher;
 	
 //	@Autowired
 //	public DataSource dataSource;
@@ -567,4 +580,17 @@ public class ImportInvoice {
 //        		.end()
         		.build();
     }
+	
+	public void launchJob() throws IOException, UnexpectedInputException, ParseException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+//		ResourcePatternResolver patternResolver = new PathMatchingResourcePatternResolver();   
+//		this.inputResources = patternResolver.getResources(inputResourcesPath);
+//		log.info("Resources found: {}",this.inputResources.length);
+//		
+		JobParameters param = new JobParametersBuilder()
+				.addDate("time", new Date())
+				.toJobParameters();
+			JobExecution execution = jobLauncher.run(ImportInvoiceJob(), param);
+
+
+	}
 }

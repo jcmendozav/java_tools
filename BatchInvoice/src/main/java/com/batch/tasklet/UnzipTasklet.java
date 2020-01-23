@@ -18,6 +18,7 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.Assert;
 
  
@@ -51,18 +52,29 @@ public class UnzipTasklet implements Tasklet, InitializingBean {
 	private String ext;
 
 	private String dateFormat;
+
+	private String resourcesStr;
 	
 
 	public UnzipTasklet() {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public UnzipTasklet(String newPath, Resource[] resources) {
+	public UnzipTasklet(String newPath, String resourcesStr) {
 		// TODO Auto-generated constructor stub
 		this.newPath=newPath;
-		this.resources=resources;
+		setResourcesStr(resourcesStr);;
 	}
 	
+	public void setResourcesStr(String resourcesStr) {
+		this.resourcesStr = resourcesStr;
+		try {
+			this.resources = new PathMatchingResourcePatternResolver().getResources(this.resourcesStr);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
  
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
     	log.info("Unzipping {} files",resources.length);

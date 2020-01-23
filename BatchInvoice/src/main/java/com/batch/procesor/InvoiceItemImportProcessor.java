@@ -23,10 +23,12 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 
+import com.batch.config.InvoiceProperties;
 import com.batch.constant.InvoiceProcess;
 import com.batch.exception.DateFormatInvoiceFields;
 import com.batch.exception.MissingMandadoryInvoiceFields;
@@ -44,46 +46,36 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 	
 	private static final Logger log = LoggerFactory.getLogger(InvoiceItemImportProcessor.class);
 
+	@Autowired
+	InvoiceProperties invoiceProperties;
 	
 	@Value("I2")
 	private String taxCodeWithTax;
 	
 	@Value("I0")
 	private String taxCodeWithNoTax;
-	
-	private Resource[] resources;
-	
-	private String currentFile;
-	
-	
-	//@Value("Servicio:(\\d{9,11})")
-	@Value("(\\d{9,11})(?!.*\\d)")
-	private String msisdnRegex;
+
 	
 	Pattern msisdnPattern ;
 	
-	public InvoiceItemImportProcessor() {
-		// TODO Auto-generated constructor stub
 
-	}
-	
-	public void setMsisdnRegex(String msisdnRegex) {
-		log.info("msisdnRegex: {}",msisdnRegex);
-		this.msisdnRegex=msisdnRegex;
-		this.msisdnPattern = Pattern.compile(msisdnRegex);
-	}
+//	public void setMsisdnRegex(String msisdnRegex) {
+//		log.info("msisdnRegex: {}",msisdnRegex);
+//		this.msisdnRegex=msisdnRegex;
+//		this.msisdnPattern = Pattern.compile(msisdnRegex);
+//	}
 
 	
-	public void setResources(Resource[] resources) {
-		this.resources = resources;
-	}
 
 	private StepExecution stepExecution;
+
+private String currentFile;
 
 	@BeforeStep
 	public void saveStepExecution(StepExecution stepExecution) {
 		this.stepExecution = stepExecution;
-		
+		this.msisdnPattern = Pattern.compile(invoiceProperties.importData.getMsisdnRegex());
+
 	}
 	
 
@@ -93,6 +85,9 @@ public class InvoiceItemImportProcessor implements ItemProcessor<InvoiceDTO, Inv
 	@Override
 	public Invoice process(InvoiceDTO invoiceDTO) throws Exception {
 		// TODO Auto-generated method stub
+		log.info("importProperties: "+invoiceProperties);
+
+		log.info("importProperties.getMsisdnRegex: "+invoiceProperties.importData.getMsisdnRegex());
 
 		ExecutionContext executionContext = stepExecution.getExecutionContext();
 		int fileProcCount=executionContext.getInt("fileProcCounter");

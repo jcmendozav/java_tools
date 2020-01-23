@@ -110,83 +110,67 @@ public class ImportInvoice {
 //	@Autowired
 //	public DataSource dataSource;
 
+
+	
+//	@Value("${batch.invoice.map.postKeyConf}")
+//	private Resource postKeyConfMapRes;
+//	
+//	@Value("${batch.invoice.map.Vendor}")
+//	private Resource vendorMapRes;
+//	
+//	@Value("${batch.invoice.map.PhoneCcnrt}")
+//	private Resource PhoneCcnrtMapRes;
+//	
+//	@Value("${batch.invoice.map.delimiter}")
+//	private String mapDelimiter;
+
+//	@Value("${batch.invoice.dateFormat}")
+//	private String dateFormat;
+	
 	//@Value("file:D:\\Users\\jcmendozav\\Documentos\\Ericsson\\Dev\\Contabilidad\\input\\*.xml")
-	@Value("${batch.invoice.import.inputResources}")
-	private Resource[] inputResources;
-
-	@Value("${batch.invoice.import.inputResources}")
-	private String inputResourcesStr;
+//	@Value("${batch.invoice.import.inputResources}")
+//	private Resource[] inputResources;
+//
+//	@Value("${batch.invoice.import.inputResources}")
+//	private String inputResourcesStr;
+//	
+//	@Value("${batch.invoice.importData.zipInputResources}")
+//	private Resource[] zipInputResources;
+//
+//	//@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/backup")
+//	@Value("${batch.invoice.import.backupPath}")
+//	private String backupPath;
+//	
+//	@Value("${batch.invoice.import.inputPath}")
+//	private String inputPath;
+//	
+//	@Value("${batch.invoice.import.outputPath}")
+//	private String outputPath;
+//	
+//	@Value("${batch.invoice.import.filesToBackup}")
+//	private String filesToBackupStr;
+//
+//	@Value("${batch.invoice.import.filesToDelete}")
+//	private String filesToDeleteStr;
+//	
+//	@Value("${batch.invoice.import.parallelFile.int}")
+//	private Integer maxPoolSize;
+//	
+//	@Value("${batch.invoice.import.chunk}")
+//	private int importChunk;
+//
+//	@Value("${batch.invoice.import.gridSize}")
+//	private int gridSize;
 	
-	@Value("${batch.invoice.import.zipInputResources}")
-	private Resource[] zipInputResources;
-
-	//@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/backup")
-	@Value("${batch.invoice.import.backupPath}")
-	private String backupPath;
-	
-	@Value("${batch.invoice.import.inputPath}")
-	private String inputPath;
-	
-	@Value("${batch.invoice.import.outputPath}")
-	private String outputPath;
-	
-	@Value("${batch.invoice.import.filesToBackup}")
-	private String filesToBackupStr;
-
-	@Value("${batch.invoice.import.filesToDelete}")
-	private String filesToDeleteStr;
-	
-	
-	@Value("${batch.invoice.map.postKeyConf}")
-	private Resource postKeyConfMapRes;
-	
-	@Value("${batch.invoice.map.VendorMap}")
-	private Resource vendorMapRes;
-	
-	@Value("${batch.invoice.map.PhoneCcnrtMap}")
-	private Resource PhoneCcnrtMapRes;
-	
-	@Value("${batch.invoice.map.delimiter}")
-	private String mapDelimiter;
-
-	@Value("${batch.invoice.dateFormat}")
-	private String dateFormat;
-	
-	@Value("${batch.invoice.import.parallelFile.int}")
-	private Integer maxPoolSize;
-	
-	@Value("${batch.invoice.export.fileTemplate.row.indexStart}")
-	private Integer rowStart;
-
-	//@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/template/invoice_exp_template.xlsx")
-	@Value("${batch.invoice.export.outputFileTemplatePath}")
-	private String fileTemplatePath;
-	
-	@Value("${batch.invoice.export.fromDaysAgo}")
-	private int daysAgo;
-
-	@Value("${batch.invoice.import.chunk}")
-	private int importChunk;
-
-	@Value("${batch.invoice.export.chunk}")
-	private int exportChunk;
-	
-	@Value("${batch.invoice.export.filePath}")
-	private String exportfilePath;
-	
-	@Value("${batch.invoice.export.delimiter}")
-	private String exportDelimiter;
-	
-	@Value("${batch.invoice.export.fieldNames}")
-	private String exportFieldNames;
-	
-	
-	@Value("(\\d{9,11})(?!.*\\d)")
-	private String msisdnRegex;
-
-	@Value("${batch.invoice.import.gridSize}")
-	private int gridSize;
+	@Autowired
+	private InvoiceProperties invoiceP;
 		
+//	@Autowired
+//	private InvoiceProperties.ExportData invoiceP.exportData = invoiceP.exportData;
+	
+	
+//	@Autowired
+//	private InvoiceProperties.ImportData invoiceP.importData = invoiceP.exportData;
 	
 	/*
 	 * this bean must be primary due to this issue:
@@ -272,9 +256,9 @@ public class ImportInvoice {
 		
 
 		InvoiceItemImportProcessor invoiceItemProcessor = new InvoiceItemImportProcessor();
-		invoiceItemProcessor.setResources(inputResources);
+//		invoiceItemProcessor.setResources(inputResources);
 		invoiceItemProcessor.setProcessingFileName(fileName);
-		invoiceItemProcessor.setMsisdnRegex(msisdnRegex);
+//		invoiceItemProcessor.setMsisdnRegex(msisdnRegex);
 		return invoiceItemProcessor;
 	}
 	
@@ -310,9 +294,9 @@ public class ImportInvoice {
 		
 		InvoiceFileStepListener listener = new InvoiceFileStepListener();
 		listener.setDataSource(dataSource());
-		listener.setBackupPath(backupPath);
+		listener.setBackupPath(invoiceP.importData.getBackupPath());
 		return stepBuilderFactory.get("uploadFileContentStep")
-				.<InvoiceDTO,Invoice>chunk(importChunk)
+				.<InvoiceDTO,Invoice>chunk(invoiceP.importData.getChunk())
 				.reader(reader(null))
 				.processor(processor(null, null))
 				.writer(insertItemWriter(null,null))
@@ -330,10 +314,10 @@ public class ImportInvoice {
     @Bean
     public Step backUpStep() {
         FileCopyTasklet task = new FileCopyTasklet();
-        task.setNewPath(backupPath);
+        task.setNewPath(invoiceP.importData.getBackupPath());
 //        task.setResources(inputResources);
-        task.setLocationPattern(filesToBackupStr);
-        task.setDateFormat(dateFormat);
+        task.setLocationPattern(invoiceP.importData.getFilesToBackupStr());
+        task.setDateFormat(invoiceP.getDateFormat());
         return stepBuilderFactory.get("backUpStep")
                 .tasklet(task)
                 .build();
@@ -342,7 +326,7 @@ public class ImportInvoice {
     @Bean
     public Step deleteInputFilesStep() {
         FileDeletingTasklet task = new FileDeletingTasklet();
-        task.setLocationPattern(filesToDeleteStr);
+        task.setLocationPattern( invoiceP.importData.getFilesToDeleteStr());
 //        task.setResources(inputResources);
         return stepBuilderFactory.get("deleteInputFilesStep")
                 .tasklet(task)
@@ -352,11 +336,15 @@ public class ImportInvoice {
     
     @Bean
     public Step upzipStep() {
-    	UnzipTasklet task = new UnzipTasklet(this.inputPath, this.zipInputResources);
+    	
+    	UnzipTasklet task = new UnzipTasklet(
+    			invoiceP.importData.getInputPath(), 
+    			invoiceP.importData.getZipInputResources()
+    			);
     	
     	UnzipListener unzipListener = new UnzipListener();
-    	unzipListener.setBackupPath(backupPath);
-    	unzipListener.setResources(this.zipInputResources);
+    	unzipListener.setBackupPath(invoiceP.importData.getBackupPath());
+    	unzipListener.setResourcesStr(invoiceP.importData.getZipInputResources());
 		return stepBuilderFactory.get("upzipStep")
         		.listener(unzipListener )
                 .tasklet(task)
@@ -372,13 +360,13 @@ public class ImportInvoice {
           
           .step(uploadFileContentStep())
           .taskExecutor(asynctaskExecutor()).taskExecutor(threadpooltaskExecutor())
-          .gridSize(gridSize)
+          .gridSize(invoiceP.importData.getGridSize())
           .build();
     }
     
     @Bean
     public CustomMultiResourcePartitioner partitioner() {
-        CustomMultiResourcePartitioner partitioner = new CustomMultiResourcePartitioner(inputResourcesStr);
+        CustomMultiResourcePartitioner partitioner = new CustomMultiResourcePartitioner( invoiceP.importData.getInputResourcesStr());
         
         //partitioner.setResources(inputResources);
        // partitioner.setResourcesPatter(inputResourcesStr);
@@ -388,7 +376,7 @@ public class ImportInvoice {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setMaxPoolSize(maxPoolSize);
+        taskExecutor.setMaxPoolSize(invoiceP.importData.getMaxPoolSize() );
         //taskExecutor.setCorePoolSize(maxPoolSize);
         //taskExecutor.setQueueCapacity(maxPoolSize);
         taskExecutor.afterPropertiesSet();
@@ -398,7 +386,7 @@ public class ImportInvoice {
 	@Bean
 	public ThreadPoolTaskExecutor threadpooltaskExecutor() {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-		taskExecutor.setMaxPoolSize(maxPoolSize);
+		taskExecutor.setMaxPoolSize(invoiceP.importData.getMaxPoolSize());
 		//taskExecutor.setCorePoolSize(maxPoolSize);
 		//taskExecutor.setQueueCapacity(maxPoolSize);
 		taskExecutor.setThreadNamePrefix("INVIMP-");
@@ -408,8 +396,11 @@ public class ImportInvoice {
 
 	@Bean
 	public TaskExecutor asynctaskExecutor() {
+		log.info("invoiceP:{}",invoiceP.toString());
+		log.info("getImportData:{}",invoiceP.getImportData());
+		log.info("getZipInputResources: {}",invoiceP.getImportData().getZipInputResources());
 		SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor("INVIMP-");
-		asyncTaskExecutor.setConcurrencyLimit(maxPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+		asyncTaskExecutor.setConcurrencyLimit(invoiceP.importData.getMaxPoolSize()); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
 		return asyncTaskExecutor;
 	}
     
@@ -444,10 +435,10 @@ public class ImportInvoice {
 	@Bean(destroyMethod="")
 	public InvoiceItemExportWriter expInvoiceXLSWriter(){
 		InvoiceItemExportWriter writer = new InvoiceItemExportWriter();
-		writer.setDateFormat(dateFormat);
-		writer.setFileTemplatePath(fileTemplatePath);
-		writer.setOutputPath(outputPath);
-		writer.setRowStart(	rowStart);
+		writer.setDateFormat(invoiceP.getDateFormat());
+//		writer.setFileTemplatePath(expor);
+//		writer.setOutputPath(outputPath);
+//		writer.setRowStart(	rowStart);
 		return writer;
 	}
 	
@@ -456,7 +447,7 @@ public class ImportInvoice {
 	public Step stepExportInvoiceStep() {
 		return stepBuilderFactory
 				.get("stepExportInvoiceStep")
-				.<InvoiceExpDTO,InvoiceExpDTO> chunk(exportChunk)
+				.<InvoiceExpDTO,InvoiceExpDTO> chunk(invoiceP.exportData.getExportChunk())
 				.reader(expInvoiceReader(null))
 				.processor(expInvoiceProc())
 				.writer(expInvoiceXLSWriter())
@@ -465,7 +456,8 @@ public class ImportInvoice {
 	
 	/*
 	 * start
-	 * stepExportImportResultStep
+	 * stepExportImportResultStep: seems confusing, however this process export the result of the previous
+	 * import process.
 	 * 
 	 * 
 	 * */
@@ -474,7 +466,7 @@ public class ImportInvoice {
 	public Step stepExportImportResultStep() {
 		return stepBuilderFactory
 				.get("stepExportImportResultStep")
-				.<Invoice,Invoice> chunk(exportChunk)
+				.<Invoice,Invoice> chunk(invoiceP.exportData.getExportChunk())
 				.reader(expImportResultReader(null))
 				//.processor(expInvoiceProc())
 				.writer(expImportResultWriter(null))
@@ -510,12 +502,14 @@ public class ImportInvoice {
 
 			) {
 		
-		
-		String[] fieldNames = exportFieldNames.split(exportDelimiter);
-        FlatFileItemWriter<Invoice> writer = new FlatFileItemWriter<>();
-        String timeStamp = new SimpleDateFormat(dateFormat).format(new Date());
+		log.info("invoiceP.exportData.getFieldNames: {}",invoiceP.exportData.getFieldNames());
+		String[] fieldNames = invoiceP.exportData.getFieldNames().toArray(new String[invoiceP.exportData.getFieldNames().size()]);
+		log.info("fieldNames: {}",Arrays.toString(fieldNames));
 
-        String outputFilePath=String.format(exportfilePath,jobExecutionID,timeStamp );
+		FlatFileItemWriter<Invoice> writer = new FlatFileItemWriter<>();
+        String timeStamp = new SimpleDateFormat(invoiceP.getDateFormat()).format(new Date());
+
+        String outputFilePath=String.format(invoiceP.exportData.getExportfilePath(),jobExecutionID,timeStamp );
         writer.setResource(new FileSystemResource(outputFilePath));
         writer.setAppendAllowed(true);
         writer.setHeaderCallback(new FlatFileHeaderCallback() {
@@ -523,12 +517,13 @@ public class ImportInvoice {
 			@Override
 			public void writeHeader(Writer writer) throws IOException {
 				// TODO Auto-generated method stub
-				writer.append(StringUtils.arrayToDelimitedString(fieldNames, exportDelimiter));
+//				writer.append(StringUtils.arrayToDelimitedString(fieldNames, exportDelimiter));
+				writer.append(invoiceP.exportData.getFieldNames().toString());
 			}
 		});
         writer.setLineAggregator(new DelimitedLineAggregator<Invoice>() {
         	{
-        	setDelimiter(exportDelimiter);
+        	setDelimiter(invoiceP.exportData.getDelimiter());
         	setFieldExtractor(new BeanWrapperFieldExtractor<Invoice>() {
         		
         		{
@@ -560,14 +555,21 @@ public class ImportInvoice {
         		.get("ImportInvoiceJob")
         		.listener(listener)
         		.incrementer(new RunIdIncrementer())
-        		.start(
-        				//uploadMap(new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath))
-                		uploadMap(new GenMapUpload<VendorMap>(dataSource(),VendorMap.class,vendorMapRes,mapDelimiter, backupPath, VendorMapSQL.CREATE, VendorMapSQL.DELETE_ALL))
+        		.start(uploadMap(new GenMapUpload<VendorMap>(dataSource(),VendorMap.class
+        				,invoiceP.getMap().getVendor()
+        				,invoiceP.getMap().getDelimiter()
+        				, invoiceP.importData.getBackupPath(), VendorMapSQL.CREATE, VendorMapSQL.DELETE_ALL))
 
         				)
         		//.next(uploadMap(new PostKeyConfUpload(dataSource(),postKeyConfMapRes,mapDelimiter, backupPath)))
-        		.next(uploadMap(new GenMapUpload<PostKeyConf>(dataSource(),PostKeyConf.class,postKeyConfMapRes,mapDelimiter, backupPath, PostKeyConfSQL.CREATE, PostKeyConfSQL.DELETE_ALL)))
-        		.next(uploadMap(new GenMapUpload<PhoneCcntr>(dataSource(),PhoneCcntr.class,PhoneCcnrtMapRes,mapDelimiter, backupPath, PhoneCcntrSQL.CREATE, PhoneCcntrSQL.DELETE_ALL)))
+        		.next(uploadMap(new GenMapUpload<PostKeyConf>(dataSource(),PostKeyConf.class
+        				,invoiceP.getMap().getPostKeyConf()
+        				,invoiceP.getMap().getDelimiter()
+        				, invoiceP.importData.getBackupPath(), PostKeyConfSQL.CREATE, PostKeyConfSQL.DELETE_ALL)))
+        		.next(uploadMap(new GenMapUpload<PhoneCcntr>(dataSource(),PhoneCcntr.class
+        				,invoiceP.getMap().getPhoneCcnrt()
+        				,invoiceP.getMap().getDelimiter()
+        				, invoiceP.importData.getBackupPath(), PhoneCcntrSQL.CREATE, PhoneCcntrSQL.DELETE_ALL)))
         		.next(upzipStep())
         		.next(backUpStep())
         		.next(partitionStep())
@@ -586,6 +588,7 @@ public class ImportInvoice {
 //		this.inputResources = patternResolver.getResources(inputResourcesPath);
 //		log.info("Resources found: {}",this.inputResources.length);
 //		
+
 		JobParameters param = new JobParametersBuilder()
 				.addDate("time", new Date())
 				.toJobParameters();

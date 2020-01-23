@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.batch.service.FileUtils;
 
@@ -18,6 +20,7 @@ public class UnzipListener implements StepExecutionListener {
 
 	
 	private Resource[] resources;
+	private String resourcesStr;
 	FileUtils fileUtils;
 	private String backupPath;
 	
@@ -35,6 +38,18 @@ public class UnzipListener implements StepExecutionListener {
 	public void setResources(Resource[] resources){
 		this.resources=resources;
 	}
+	
+	
+	public void setResourcesStr(String resourcesStr) {
+		this.resourcesStr = resourcesStr;
+		try {
+			this.resources = new PathMatchingResourcePatternResolver().getResources(this.resourcesStr);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	@Override
 	public void beforeStep(StepExecution stepExecution) {

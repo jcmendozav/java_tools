@@ -25,14 +25,16 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamWriter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Component;
 
+import com.batch.config.InvoiceProperties;
 import com.batch.model.InvoiceExpDTO;
 
 
@@ -44,6 +46,9 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
 	
 	private static final Logger log = LoggerFactory.getLogger(InvoiceItemExportWriter.class);
 
+	@Autowired
+	private InvoiceProperties invoiceProperties;
+	
 	private Workbook wb;
 	
 	private int row;
@@ -59,20 +64,27 @@ public class InvoiceItemExportWriter implements ItemStreamWriter<InvoiceExpDTO> 
 
 	private int rowStart;
 	
-	public void setRowStart(int rowStart) {
-		this.rowStart = rowStart;
-	}
+//	public void setRowStart(int rowStart) {
+//		this.rowStart = rowStart;
+//	}
 	
-	public void setFileTemplatePath(String fileTemplatePath) {
-		this.fileTemplatePath = fileTemplatePath;
-	}
+//	public void setFileTemplatePath(String fileTemplatePath) {
+//		this.fileTemplatePath = fileTemplatePath;
+//	}
 	
-	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
-	}
+//	public void setOutputPath(String outputPath) {
+//		this.outputPath = outputPath;
+//	}
 	
 	public void setDateFormat(String dateFormat) {
 		this.dateFormat = dateFormat;
+	}
+	
+	@BeforeStep
+	public void init() {
+		this.outputPath=invoiceProperties.exportData.getOutputPath();
+		this.fileTemplatePath=invoiceProperties.exportData.getFileTemplatePath();
+		this.rowStart = invoiceProperties.exportData.getRowStart();
 	}
 
 	@Override

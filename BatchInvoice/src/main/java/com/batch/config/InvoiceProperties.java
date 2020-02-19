@@ -15,7 +15,14 @@ import org.springframework.validation.annotation.Validated;
 
 public class InvoiceProperties {
 
+	@Override
+	public String toString() {
+		return "InvoiceProperties [dateFormat=" + dateFormat + ", taxPercent=" + taxPercent + ", importData="
+				+ importData + ", exportData=" + exportData + ", map=" + map + "]";
+	}
+
 	String dateFormat;
+	Double taxPercent;
 
 	public final ImportData importData = new ImportData();
 	public final ExportData exportData = new ExportData();
@@ -43,6 +50,15 @@ public class InvoiceProperties {
 
 	public static class ImportData {
 
+		@Override
+		public String toString() {
+			return "ImportData [msisdnRegex=" + msisdnRegex + ", inputResources=" + Arrays.toString(inputResources)
+					+ ", inputResourcesStr=" + inputResourcesStr + ", zipInputResources=" + zipInputResources
+					+ ", backupPath=" + backupPath + ", inputPath=" + inputPath + ", outputPath=" + outputPath
+					+ ", filesToBackupStr=" + filesToBackupStr + ", filesToDeleteStr=" + filesToDeleteStr
+					+ ", maxPoolSize=" + maxPoolSize + ", chunk=" + chunk + ", gridSize=" + gridSize + "]";
+		}
+
 		public String getMsisdnRegex() {
 			return msisdnRegex;
 		}
@@ -51,7 +67,7 @@ public class InvoiceProperties {
 			this.msisdnRegex = msisdnRegex;
 		}
 
-		public static String msisdnRegex;
+		public  String msisdnRegex;
 
 //		@Value("${batch.invoice.import.inputResources}")
 		private Resource[] inputResources;
@@ -174,10 +190,19 @@ public class InvoiceProperties {
 
 //		@Value("${batch.invoice.import.gridSize}")
 		private int gridSize;
+		
+		
 
 	}
 
 	public static class ExportData {
+
+		@Override
+		public String toString() {
+			return "ExportData [fieldNames=" + fieldNames + ", rowStart=" + rowStart + ", fileTemplatePath="
+					+ fileTemplatePath + ", daysAgo=" + daysAgo + ", exportChunk=" + exportChunk + ", exportfilePath="
+					+ exportfilePath + ", delimiter=" + delimiter + ", outputPath=" + outputPath + "]";
+		}
 
 		private List<String> fieldNames;
 
@@ -265,6 +290,8 @@ public class InvoiceProperties {
 		public void setDelimiter(String delimiter) {
 			this.delimiter = delimiter;
 		}
+		
+		
 
 	}
 
@@ -321,11 +348,16 @@ public class InvoiceProperties {
 
 		
 	}
-
-	@Override
-	public String toString() {
-		return "InvoiceProperties [dateFormat=" + dateFormat + ", importData=" + importData + ", exportData="
-				+ exportData + ", map=" + map + "]";
+	
+	public Double getTaxPercent() {
+		return taxPercent;
 	}
+	
+	public void setTaxPercent(Double taxPercent) {
+		this.taxPercent = taxPercent;
+	}
+
+
+	
 
 }

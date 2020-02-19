@@ -10,7 +10,8 @@ public interface InvoiceSQL {
 	  		",COALESCE(VM.VENDOR_ID,'NOT_FOUND' ) AS VENDOR_ID\r\n" + 
 	  		",IV.ISSUE_DATE as DOC_DATE \r\n" + 
 	  		",CURRENT_DATE as POSTING_DATE \r\n" + 
-	  		",RIGHT('0' || RTRIM(month(IV.DOC_DATE)),2) as PERIOD \r\n" + 
+//	  		",RIGHT('0' || RTRIM(month(IV.DOC_DATE)),2) as PERIOD \r\n" + 
+	  		",RIGHT('0' || RTRIM(month(CURRENT_DATE)),2) as PERIOD \r\n" + 
 	  		",'KU' AS DOC_TYPE\r\n" + 
 	  		",IV.CURRENCY_CODE \r\n" + 
 	  		",IV.NUMBER_SERIE as REF_NO \r\n" + 
@@ -25,8 +26,15 @@ public interface InvoiceSQL {
 	  		",IV.AMNT_DOC_CURR \r\n" + 
 	  		",IV.AMNT_LOCAL_TYPE \r\n" + 
 	  		",'ZP07' AS PAYM_TRM \r\n" + 
-	  		",IV.ISSUE_DATE AS BASE_DATE\r\n" + 
-	  		",COALESCE(pc.ccntr,'NOT_FOUND') AS CCNTR\r\n" + 
+//	  		",IV.ISSUE_DATE AS BASE_DATE\r\n" + 	  		
+	  		",CURRENT_DATE AS BASE_DATE\r\n" + 
+
+//	  		",COALESCE(pc.ccntr,'NOT_FOUND') AS CCNTR\r\n" + 
+	  		", case IV.Amnt_local_Type " +
+	  		"	when 'sub-total' 	then COALESCE(pc.ccntr,'NOT_FOUND' ) " +
+	  		" 	else '' END " +
+	  		"as CCNTR \r\n" + 
+	  		
 	  		",COALESCE(VM.assign_no,'NOT_FOUND' ) AS ASSIGN_NO\r\n" + 
 	  		",COALESCE(IV.unique_phone_item,'NOT_FOUND')||' - '||COALESCE(pc.full_name,'NOT_FOUND') AS ITM_TXT\r\n" + 
 	  		",case IV.ta "+
@@ -35,7 +43,7 @@ public interface InvoiceSQL {
 	  		",FILE_ID\r\n" + 
 	  		"FROM (select *,ta as Amnt_Doc_Curr, 'igv' as Amnt_local_Type  from invoice where 1=1   \r\n" + 
 	  		"union all\r\n" + 
-	  		"select *,lea as Amnt_Doc_Curr, 'sub-total' as Amnt_local_Type  from invoice where 1=1   \r\n" + 
+	  		"select *,subtotal as Amnt_Doc_Curr, 'sub-total' as Amnt_local_Type  from invoice where 1=1   \r\n" + 
 	  		"union all\r\n" + 
 	  		"select *,pa as Amnt_Doc_Curr, 'total' as Amnt_local_Type  from invoice where 1=1     \r\n" + 
 	  		" ) AS IV\r\n" + 
@@ -100,6 +108,7 @@ public interface InvoiceSQL {
 			+ ",proc_desc"
 			+ ",unique_phone_item"
 			+ ",phone_desc_item"
+			+ ",subtotal"
 			+ ") "
 			+ "values "
 			+ "("
@@ -121,5 +130,6 @@ public interface InvoiceSQL {
 			+ ",:procDesc"
 			+ ",:uniquePhoneItem"
 			+ ",:phoneDescItem"
+			+ ",:subtotal"
 			+ ")"	;
 }

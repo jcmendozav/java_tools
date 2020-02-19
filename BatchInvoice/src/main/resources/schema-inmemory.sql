@@ -27,6 +27,7 @@ CREATE TABLE  invoice (
     lea numeric(10,4),
     ta numeric(10,4),
     pa numeric(10,4),
+    subtotal numeric(10,4),
     status numeric DEFAULT 0,
     file_id numeric,
     job_execution_id numeric,

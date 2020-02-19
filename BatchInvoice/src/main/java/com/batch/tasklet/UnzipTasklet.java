@@ -63,7 +63,7 @@ public class UnzipTasklet implements Tasklet, InitializingBean {
 	public UnzipTasklet(String newPath, String resourcesStr) {
 		// TODO Auto-generated constructor stub
 		this.newPath=newPath;
-		setResourcesStr(resourcesStr);;
+		setResourcesStr(resourcesStr);
 	}
 	
 	public void setResourcesStr(String resourcesStr) {

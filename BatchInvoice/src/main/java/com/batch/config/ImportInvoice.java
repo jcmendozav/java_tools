@@ -107,60 +107,6 @@ public class ImportInvoice {
 	@Autowired
 	private JobLauncher jobLauncher;
 	
-//	@Autowired
-//	public DataSource dataSource;
-
-
-	
-//	@Value("${batch.invoice.map.postKeyConf}")
-//	private Resource postKeyConfMapRes;
-//	
-//	@Value("${batch.invoice.map.Vendor}")
-//	private Resource vendorMapRes;
-//	
-//	@Value("${batch.invoice.map.PhoneCcnrt}")
-//	private Resource PhoneCcnrtMapRes;
-//	
-//	@Value("${batch.invoice.map.delimiter}")
-//	private String mapDelimiter;
-
-//	@Value("${batch.invoice.dateFormat}")
-//	private String dateFormat;
-	
-	//@Value("file:D:\\Users\\jcmendozav\\Documentos\\Ericsson\\Dev\\Contabilidad\\input\\*.xml")
-//	@Value("${batch.invoice.import.inputResources}")
-//	private Resource[] inputResources;
-//
-//	@Value("${batch.invoice.import.inputResources}")
-//	private String inputResourcesStr;
-//	
-//	@Value("${batch.invoice.importData.zipInputResources}")
-//	private Resource[] zipInputResources;
-//
-//	//@Value("D:/Users/jcmendozav/Documentos/Ericsson/Dev/Contabilidad/backup")
-//	@Value("${batch.invoice.import.backupPath}")
-//	private String backupPath;
-//	
-//	@Value("${batch.invoice.import.inputPath}")
-//	private String inputPath;
-//	
-//	@Value("${batch.invoice.import.outputPath}")
-//	private String outputPath;
-//	
-//	@Value("${batch.invoice.import.filesToBackup}")
-//	private String filesToBackupStr;
-//
-//	@Value("${batch.invoice.import.filesToDelete}")
-//	private String filesToDeleteStr;
-//	
-//	@Value("${batch.invoice.import.parallelFile.int}")
-//	private Integer maxPoolSize;
-//	
-//	@Value("${batch.invoice.import.chunk}")
-//	private int importChunk;
-//
-//	@Value("${batch.invoice.import.gridSize}")
-//	private int gridSize;
 	
 	@Autowired
 	private InvoiceProperties invoiceP;
@@ -209,7 +155,7 @@ public class ImportInvoice {
 	public Step uploadMap(MapUploadUtil vm) {
 
 //		MapUploadUtil vm = new VendorMapUpload(dataSource(),vendorMapRes,mapDelimiter, backupPath);
-		log.info("Uploading map ");
+		log.info("Uploading map");
 		return stepBuilderFactory
 				.get("uploadMap")
 				.allowStartIfComplete(true)
@@ -241,7 +187,7 @@ public class ImportInvoice {
         Jaxb2Marshaller invoiceMarshaller = new Jaxb2Marshaller();
         invoiceMarshaller.setClassesToBeBound(InvoiceDTO.class);
         xmlFileReader.setUnmarshaller(invoiceMarshaller);
-    	log.debug("StaxEventItemReader end	: {}",filePath);
+    	log.debug("StaxEventItemReader end		: {}",filePath);
         return xmlFileReader;
     }
     
@@ -337,6 +283,7 @@ public class ImportInvoice {
     @Bean
     public Step upzipStep() {
     	
+    	log.info("upzipStep - invoiceP: {}",invoiceP);
     	UnzipTasklet task = new UnzipTasklet(
     			invoiceP.importData.getInputPath(), 
     			invoiceP.importData.getZipInputResources()

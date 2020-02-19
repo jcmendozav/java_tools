@@ -14,6 +14,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class InvoiceDTO {
 
 	
+	@Override
+	public String toString() {
+		return "InvoiceDTO [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
+				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode + ", accountingSupplierParty="
+				+ accountingSupplierParty + ", legalMonetaryTotal=" + legalMonetaryTotal + ", taxTotal=" + taxTotal
+				+ ", filePath=" + filePath + ", invoiceLines=" + invoiceLines + "]";
+	}
 	public String getID() {
 		return ID;
 	}
@@ -136,7 +143,8 @@ public class InvoiceDTO {
 				+ ", accountingSupplierParty="+ accountingSupplierParty 
 				+ ", ruc="+ accountingSupplierParty.getParty().getPartyIdentification().getID()
 				+ ", igv="+ taxTotal.getTaxAmount()
-				+ ", subtotal="+ legalMonetaryTotal.getLineExtensionAmount()
+				+ ", subtotal-1="+ legalMonetaryTotal.getLineExtensionAmount()
+				+ ", subtotal-2="+ taxTotal.getTaxSubtotal().getTaxableAmount()
 				+ ", total="+ legalMonetaryTotal.getPayableAmount()
 				+ ", invoiceLines="+ invoiceLines.toString()
 				+ "]";
@@ -146,14 +154,8 @@ public class InvoiceDTO {
 	
 
 	
-	
-	@Override
-	public String toString() {
-		return "InvoiceDTO [ID=" + ID + ", issueDate=" + issueDate + ", issueTime=" + issueTime + ", invoiceTypeCode="
-				+ invoiceTypeCode + ", documentCurrencyCode=" + documentCurrencyCode + ", accountingSupplierParty="
-				+ accountingSupplierParty + ", legalMonetaryTotal=" + legalMonetaryTotal + ", taxTotal=" + taxTotal
-				+ ", filePath=" + filePath + ", invoiceLines=" + invoiceLines + "]";
-	}
+
+
 	public void setFilePath(String filePath) {
 		// TODO Auto-generated method stub
 		this.filePath=filePath;

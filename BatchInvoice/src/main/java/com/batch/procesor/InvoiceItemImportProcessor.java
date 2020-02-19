@@ -1,5 +1,8 @@
 package com.batch.procesor;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -127,8 +130,37 @@ private String currentFile;
 		invoice.setPartyId(invoiceDTO.getAccountingSupplierParty().getParty().getPartyIdentification().getID());
 		invoice.setTaxAmount(invoiceDTO.getTaxTotal().getTaxAmount());
 		invoice.setPayableAmount(invoiceDTO.getLegalMonetaryTotal().getPayableAmount());
+		/* sub-total begin*/
 		invoice.setLineExtensionAmount(invoiceDTO.getLegalMonetaryTotal().getLineExtensionAmount());
-		invoice.setPayableAmount(invoiceDTO.getLegalMonetaryTotal().getPayableAmount());
+//		invoice.setSubtotal(invoiceDTO.getTaxTotal().getTaxSubtotal().getTaxableAmount());
+		invoice.setSubtotal(invoiceDTO.getLegalMonetaryTotal().getTaxInclusiveAmount());
+		if(!round(invoice.getPayableAmount(),2).equals(round((invoice.getSubtotal()+invoice.getTaxAmount()),2))) 
+		{
+			log.info("Invalid amunts		: total: {}, sub-total: {}, tax: {}",
+					invoice.getPayableAmount(),
+					invoice.getSubtotal(),
+					invoice.getTaxAmount()
+					);
+			if(invoice.getTaxAmount()>0) {
+			invoice.setSubtotal(
+					round(invoice.getTaxAmount()/(invoiceProperties.getTaxPercent()),2)
+					);
+			}
+			else
+				invoice.setSubtotal(invoice.getPayableAmount());
+//			invoice.setTaxAmount(
+//					round(invoice.getPayableAmount()*(invoiceProperties.getTaxPercent()),2)
+//					);
+			log.info("New calculated amunts	: total: {}, sub-total: {}, tax: {}",
+					invoice.getPayableAmount(),
+					invoice.getSubtotal(),
+					invoice.getTaxAmount()
+					);
+			
+		}
+		/* sub-total end  */
+
+//		invoice.setPayableAmount(invoiceDTO.getLegalMonetaryTotal().getPayableAmount());
 		invoice.setTaxCode((invoiceDTO.getTaxTotal().getTaxAmount()!=0?taxCodeWithTax:taxCodeWithNoTax));
 		invoice.setInvoiceTypeCode(invoiceDTO.getInvoiceTypeCode());
 		List<String> phoneList = getDescPhoneNumber(
@@ -146,7 +178,7 @@ private String currentFile;
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			invoice.setProcStatus(InvoiceProcess.ERROR);
-			invoice.setProcDesc(e.getMessage().substring(0, 255));
+			invoice.setProcDesc(e.getMessage().substring(0, e.getMessage().length()<255? e.getMessage().length(): 255));
 			log.info("Saving invoice process status with error: {}",invoice);
 
 		}		
@@ -156,6 +188,19 @@ private String currentFile;
 		
 		return invoice;
 	}
+
+	
+
+	private Double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+	 
+	    BigDecimal bd = new BigDecimal(Double.toString(value));
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
+	}
+
+
+
 
 	private List<String> getDescPhoneNumber(List<String> descList, Pattern pattern) {
 		// TODO Auto-generated method stub

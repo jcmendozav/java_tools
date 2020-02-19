@@ -212,8 +212,24 @@ public class Invoice {
 		return phoneDescItem;
 	}
 
+	public void setTaxableAmount(Double taxableAmount) {
+		// TODO Auto-generated method stub
+		this.taxableAmount=taxableAmount;
+	}
 
+	
+	public Double getTaxableAmount() {
+		return taxableAmount;
+	}
 
+	public void setSubtotal(Double subtotal) {
+		// TODO Auto-generated method stub
+		this.subtotal=subtotal;
+	}
+	
+	public Double getSubtotal() {
+		return subtotal;
+	}
 
 	@Override
 	public String toString() {
@@ -261,6 +277,9 @@ public class Invoice {
 	private List<String> phoneItemList;
 	private String uniquePhoneItem;
 	private String phoneDescItem;
+	private Double taxableAmount;
+	private Double subtotal;
+
 
 
 	

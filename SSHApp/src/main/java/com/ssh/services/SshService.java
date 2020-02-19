@@ -4,24 +4,27 @@ import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-import com.ssh.batch.model.sshParamsInput;
-import com.ssh.batch.model.sshResult;
+import com.ssh.batch.model.SshParamsInput;
+import com.ssh.batch.model.SshResult;
 import com.ssh.contants.SshStatus;
 
+
+@Service
 public class SshService {
 
 	private static final Logger log = LoggerFactory.getLogger(SshService.class);
 
-	public static sshResult run(sshParamsInput item) {
+	public static SshResult run(SshParamsInput item, int timeout) {
 		// TODO Auto-generated method stub
 
-		log.info("###### start: {}",item);
-		sshResult result = new sshResult(item);
+		log.debug("###### start: {}",item);
+		SshResult result = new SshResult(item);
 
 		String host = item.getHost();
 		String user = item.getUser();
@@ -35,8 +38,9 @@ public class SshService {
 			Session session = jsch.getSession(user, host, 22);
 			session.setPassword(password);
 			session.setConfig(config);
+			session.setTimeout(timeout);
+			log.info("Connected, conf timeout:{}",session.getTimeout());
 			session.connect();
-			log.info("Connected");
 
 			Channel channel = session.openChannel("exec");
 			((ChannelExec) channel).setCommand(command1);
@@ -78,9 +82,9 @@ public class SshService {
 			;
 		}
 		
-		log.info("###### end  : {}",item);
-		log.info("###### ");
-		log.info("###### ");
+		log.debug("###### end  : {}",item);
+		log.debug("###### ");
+		log.debug("###### ");
 
 		return result;
 	}

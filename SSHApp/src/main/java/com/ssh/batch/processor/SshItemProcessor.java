@@ -6,27 +6,32 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import com.ssh.batch.config.BatchAppProperties;
-import com.ssh.batch.model.sshParamsInput;
-import com.ssh.batch.model.sshResult;
+import com.ssh.batch.model.SshParamsInput;
+import com.ssh.batch.model.SshResult;
 import com.ssh.services.SshService;
 
 
-public class SshItemProcessor implements ItemProcessor<sshParamsInput, sshResult> {
+public class SshItemProcessor implements ItemProcessor<SshParamsInput, SshResult> {
 
 	
 	
 	
 	private String newLineDelimiter;
+	private int timeout;
+	
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
 	
 	public void setNewLineDelimiter(String newLineDelimiter) {
 		this.newLineDelimiter = newLineDelimiter;
 	}
 
 	@Override
-	public sshResult process(sshParamsInput item) throws Exception {
+	public SshResult process(SshParamsInput item) throws Exception {
 		// TODO Auto-generated method stub
 		
-		sshResult result = SshService.run(item);
+		SshResult result = SshService.run(item,timeout);
 		result.setNewLineDelimiter(newLineDelimiter);
 		return result;
 	}

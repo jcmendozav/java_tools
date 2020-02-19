@@ -1,6 +1,6 @@
 package com.ssh.batch.model;
 
-public class sshParamsInput {
+public class SshParamsInput {
 
 	public String getHost() {
 		return host;

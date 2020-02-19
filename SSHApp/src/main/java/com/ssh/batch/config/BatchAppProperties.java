@@ -10,14 +10,31 @@ import org.springframework.stereotype.Component;
 
 public class BatchAppProperties {
 
+	
+	
 	@Override
 	public String toString() {
 		return "BatchAppProperties [chunk=" + chunk + ", inputPattern=" + inputPattern + ", delimiter=" + delimiter
 				+ ", fieldNamesInput=" + fieldNamesInput + ", dateFormat=" + dateFormat + ", fieldNamesResult="
 				+ fieldNamesResult + ", exportFileFormat=" + exportFileFormat + ", exportHeader=" + exportHeader
 				+ ", threadPoolSize=" + threadPoolSize + ", gridSize=" + gridSize + ", newLineDelimiter="
-				+ newLineDelimiter + "]";
+				+ newLineDelimiter + ", jobThreadPoolSize=" + jobThreadPoolSize + ", stepThreadPoolSize="
+				+ stepThreadPoolSize + ", sshTimeout=" + sshTimeout + "]";
 	}
+	
+	public int getJobThreadPoolSize() {
+		return jobThreadPoolSize;
+	}
+	public void setJobThreadPoolSize(int jobThreadPoolSize) {
+		this.jobThreadPoolSize = jobThreadPoolSize;
+	}
+	public int getStepThreadPoolSize() {
+		return stepThreadPoolSize;
+	}
+	public void setStepThreadPoolSize(int stepThreadPoolSize) {
+		this.stepThreadPoolSize = stepThreadPoolSize;
+	}
+
 	public int getChunk() {
 		return chunk;
 	}
@@ -87,7 +104,13 @@ public class BatchAppProperties {
 		return newLineDelimiter;
 	}
 	
+	public void setSshTimeout(int sshTimeout) {
+		this.sshTimeout = sshTimeout;
+	}
 	
+	public int getSshTimeout() {
+		return sshTimeout;
+	}
 	
 
 
@@ -105,6 +128,11 @@ public class BatchAppProperties {
 	public int threadPoolSize;
 	public int gridSize;
 	public String newLineDelimiter;
+
+	public int jobThreadPoolSize;
+	public int stepThreadPoolSize;
+
+	public int sshTimeout;
 	
 	
 	

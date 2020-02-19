@@ -1,10 +1,10 @@
 package com.ssh.batch.model;
 
-public class sshResult {
+public class SshResult {
 
 	
 
-	public sshResult(sshParamsInput item) {
+	public SshResult(SshParamsInput item) {
 		// TODO Auto-generated constructor stub
 		this.host=item.host;
 		this.command1= item.command1;

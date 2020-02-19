@@ -50,8 +50,8 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.ssh.batch.listener.JobCompletionNotificationListener;
-import com.ssh.batch.model.sshParamsInput;
-import com.ssh.batch.model.sshResult;
+import com.ssh.batch.model.SshParamsInput;
+import com.ssh.batch.model.SshResult;
 import com.ssh.batch.partitioner.ImportBatchFilePartitioner;
 import com.ssh.batch.processor.SshItemProcessor;
 
@@ -117,7 +117,7 @@ public class SSH {
 				.get("partitionStep")
 				.partitioner("slaveStep", partitioner())
 				.step(sshConnectionStep())
-		         .taskExecutor(asynctaskExecutor())
+		         .taskExecutor(asyncJobPartTaskExecutor())
 //		         .taskExecutor(threadpooltaskExecutor())
 				.gridSize(batchProp.gridSize)
 				.build();
@@ -131,22 +131,30 @@ public class SSH {
 		return partitioner;
 	}
 	
-	@Bean
-	public ThreadPoolTaskExecutor threadpooltaskExecutor() {
-		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-		taskExecutor.setMaxPoolSize(batchProp.threadPoolSize);
-		//taskExecutor.setCorePoolSize(maxPoolSize);
-		//taskExecutor.setQueueCapacity(maxPoolSize);
-		taskExecutor.setThreadNamePrefix("SSHIMP-");
-		taskExecutor.afterPropertiesSet();
-		return taskExecutor;
-	}
+//	@Bean
+//	public ThreadPoolTaskExecutor threadpooltaskExecutor() {
+//		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+//		taskExecutor.setMaxPoolSize(batchProp.threadPoolSize);
+//		//taskExecutor.setCorePoolSize(maxPoolSize);
+//		//taskExecutor.setQueueCapacity(maxPoolSize);
+//		taskExecutor.setThreadNamePrefix("SSHIMP-");
+//		taskExecutor.afterPropertiesSet();
+//		return taskExecutor;
+//	}
 	
 	@Bean
-	public TaskExecutor asynctaskExecutor() {
-		SimpleAsyncTaskExecutor asyncTaskExecutor = new SimpleAsyncTaskExecutor("SSHIMP-");
-		asyncTaskExecutor.setConcurrencyLimit(batchProp.threadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
-		return asyncTaskExecutor;
+	public TaskExecutor asyncJobPartTaskExecutor() {
+		SimpleAsyncTaskExecutor asyncJobPartTaskExecutor = new SimpleAsyncTaskExecutor("SSH-JOB-IMP-");
+		asyncJobPartTaskExecutor.setConcurrencyLimit(batchProp.jobThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+		return asyncJobPartTaskExecutor;
+	}
+	
+	
+	@Bean
+	public TaskExecutor asyncStepTaskExecutor() {
+		SimpleAsyncTaskExecutor asyncStepTaskExecutor = new SimpleAsyncTaskExecutor("SSH-STEP-IMP-");
+		asyncStepTaskExecutor.setConcurrencyLimit(batchProp.stepThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+		return asyncStepTaskExecutor;
 	}
 	
 //	@Bean
@@ -175,10 +183,11 @@ public class SSH {
 		// TODO Auto-generated method stub
 		return stepBuilderFactory
 				.get("sshConnectionStep")
-				.<sshParamsInput,sshResult> chunk(batchProp.chunk)
+				.<SshParamsInput,SshResult> chunk(batchProp.chunk)
 				.reader(sshParamsInputReader(null))
 				.processor(sshParamsInputProcessor())
 				.writer(sshResultWriter(null))
+				.taskExecutor(asyncStepTaskExecutor())
 				.build()
 				;
 	}
@@ -186,13 +195,13 @@ public class SSH {
 
 	@Bean(destroyMethod = "")
 	@StepScope
-	public FlatFileItemReader<sshParamsInput> sshParamsInputReader(
+	public FlatFileItemReader<SshParamsInput> sshParamsInputReader(
     		@Value("#{stepExecutionContext[filePath]}") String filePath
 
 			) {
 		// TODO Auto-generated method stub
 		log.info("filePath: {}",filePath);
-		FlatFileItemReader<sshParamsInput> itemReader = new FlatFileItemReader<sshParamsInput>();
+		FlatFileItemReader<SshParamsInput> itemReader = new FlatFileItemReader<SshParamsInput>();
 		itemReader.setResource(new FileSystemResource(filePath));
 		itemReader.setLineMapper(lineMapper());
 		itemReader.setLinesToSkip(1);
@@ -202,16 +211,16 @@ public class SSH {
 	
 	
 	@Bean
-	public LineMapper<sshParamsInput> lineMapper() {
-		DefaultLineMapper<sshParamsInput> lineMapper = new DefaultLineMapper<sshParamsInput>();
+	public LineMapper<SshParamsInput> lineMapper() {
+		DefaultLineMapper<SshParamsInput> lineMapper = new DefaultLineMapper<SshParamsInput>();
 		DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
 		String [] names = batchProp.fieldNamesInput.split(Pattern.quote(batchProp.delimiter));
 		lineTokenizer.setNames(names);
 		lineTokenizer.setDelimiter(batchProp.delimiter);
 		//log.info("range from field names: {}",IntStream.range(0, names.length).toArray());
 		lineTokenizer.setIncludedFields(IntStream.range(0, names.length).toArray());
-		BeanWrapperFieldSetMapper<sshParamsInput> fieldSetMapper = new BeanWrapperFieldSetMapper<sshParamsInput>();
-		fieldSetMapper.setTargetType(sshParamsInput.class);
+		BeanWrapperFieldSetMapper<SshParamsInput> fieldSetMapper = new BeanWrapperFieldSetMapper<SshParamsInput>();
+		fieldSetMapper.setTargetType(SshParamsInput.class);
 		lineMapper.setLineTokenizer(lineTokenizer);
 		lineMapper.setFieldSetMapper(fieldSetMapper);
 		
@@ -220,10 +229,10 @@ public class SSH {
 	
 	@Bean(destroyMethod = "")
 	@StepScope
-	public FlatFileItemWriter<sshResult> sshResultWriter(
+	public FlatFileItemWriter<SshResult> sshResultWriter(
 			@Value("#{stepExecutionContext[fileName]}") String fileName
 			) {
-		FlatFileItemWriter<sshResult> writer = new FlatFileItemWriter<sshResult>();
+		FlatFileItemWriter<SshResult> writer = new FlatFileItemWriter<SshResult>();
 		// TODO Auto-generated method stub
         String timeStamp = new SimpleDateFormat(batchProp.dateFormat).format(new Date());
 
@@ -245,7 +254,7 @@ public class SSH {
 
 		});
         
-        writer.setLineAggregator(new DelimitedLineAggregator<sshResult>() {
+        writer.setLineAggregator(new DelimitedLineAggregator<SshResult>() {
         	{
         		
     
@@ -256,7 +265,7 @@ public class SSH {
         	setDelimiter(batchProp.delimiter);
         	
 
-        	setFieldExtractor(new BeanWrapperFieldExtractor<sshResult>() {
+        	setFieldExtractor(new BeanWrapperFieldExtractor<SshResult>() {
         		
         		
         		{
@@ -270,9 +279,10 @@ public class SSH {
 		
 	}
 
-	private ItemProcessor<sshParamsInput, sshResult> sshParamsInputProcessor() {
+	private ItemProcessor<SshParamsInput, SshResult> sshParamsInputProcessor() {
 		SshItemProcessor processor = new SshItemProcessor();
 		processor.setNewLineDelimiter(batchProp.newLineDelimiter);
+		processor.setTimeout(batchProp.sshTimeout);
 		// TODO Auto-generated method stub
 		return processor;
 	}

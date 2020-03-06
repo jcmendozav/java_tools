@@ -21,14 +21,22 @@ import com.ssh.contants.SshStatus;
  * */
 
 @Service
-public class SshService {
+public class JshService {
 
-	private static final Logger log = LoggerFactory.getLogger(SshService.class);
+	private static final Logger log = LoggerFactory.getLogger(JshService.class);
+	private static JSch jsch;
 
+
+	public JshService() {
+		// TODO Auto-generated constructor stub
+		jsch = new JSch();
+
+	}
+	
 	public static SshResult run(SshParamsInput item) {
 		// TODO Auto-generated method stub
 
-		log.debug("###### start: {}",item);
+		log.info("###### start: {}",item);
 		SshResult result = new SshResult(item);
 
 		String host = item.getHost();
@@ -40,12 +48,11 @@ public class SshService {
 
 			java.util.Properties config = new java.util.Properties();
 			config.put("StrictHostKeyChecking", "no");
-			JSch jsch = new JSch();
 			Session session = jsch.getSession(user, host, 22);
 			session.setPassword(password);
 			session.setConfig(config);
 			session.setTimeout(timeout);
-			log.debug("Connected, conf timeout:{}",session.getTimeout());
+			log.info("Connected, conf timeout:{}",session.getTimeout());
 			session.connect();
 
 			Channel channel = session.openChannel("exec");

@@ -17,7 +17,8 @@ public class BatchAppProperties {
 		return "BatchAppProperties [chunk=" + chunk + ", inputPattern=" + inputPattern + ", delimiter=" + delimiter
 				+ ", fieldNamesInput=" + fieldNamesInput + ", dateFormat=" + dateFormat + ", fieldNamesResult="
 				+ fieldNamesResult + ", exportFileFormat=" + exportFileFormat + ", exportHeader=" + exportHeader
-				+ ", threadPoolSize=" + threadPoolSize + ", gridSize=" + gridSize + ", newLineDelimiter="
+//				+ ", threadPoolSize=" + threadPoolSize + ", "
+						+ "gridSize=" + gridSize + ", newLineDelimiter="
 				+ newLineDelimiter + ", jobThreadPoolSize=" + jobThreadPoolSize + ", stepThreadPoolSize="
 				+ stepThreadPoolSize + ", sshTimeout=" + sshTimeout + "]";
 	}
@@ -83,12 +84,12 @@ public class BatchAppProperties {
 	public void setExportHeader(String exportHeader) {
 		this.exportHeader = exportHeader;
 	}
-	public int getThreadPoolSize() {
-		return threadPoolSize;
-	}
-	public void setThreadPoolSize(int threadPoolSize) {
-		this.threadPoolSize = threadPoolSize;
-	}
+//	public int getThreadPoolSize() {
+//		return threadPoolSize;
+//	}
+//	public void setThreadPoolSize(int threadPoolSize) {
+//		this.threadPoolSize = threadPoolSize;
+//	}
 	public int getGridSize() {
 		return gridSize;
 	}
@@ -125,7 +126,6 @@ public class BatchAppProperties {
 	public String fieldNamesResult;
 	public String exportFileFormat;
 	public String exportHeader;
-	public int threadPoolSize;
 	public int gridSize;
 	public String newLineDelimiter;
 

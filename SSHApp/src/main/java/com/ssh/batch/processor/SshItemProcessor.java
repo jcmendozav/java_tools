@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.ssh.batch.config.BatchAppProperties;
 import com.ssh.batch.model.SshParamsInput;
 import com.ssh.batch.model.SshResult;
+import com.ssh.services.SshInterface;
 import com.ssh.services.SshService;
 
 
@@ -18,6 +19,7 @@ public class SshItemProcessor implements ItemProcessor<SshParamsInput, SshResult
 	
 	private String newLineDelimiter;
 	private int timeout;
+	private SshInterface sshInt;
 	
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
@@ -31,9 +33,17 @@ public class SshItemProcessor implements ItemProcessor<SshParamsInput, SshResult
 	public SshResult process(SshParamsInput item) throws Exception {
 		// TODO Auto-generated method stub
 		
-		SshResult result = SshService.run(item,timeout);
+		item.setTimeOut(timeout);
+//		SshResult result = SshService.run(item);
+		SshResult result = sshInt.run(item);
+
 		result.setNewLineDelimiter(newLineDelimiter);
 		return result;
+	}
+
+	public void setSshInterface(SshInterface sshInt) {
+		// TODO Auto-generated method stub
+		this.sshInt = sshInt;
 	}
 
 }

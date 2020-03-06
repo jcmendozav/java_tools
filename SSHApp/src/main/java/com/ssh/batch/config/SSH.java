@@ -54,6 +54,7 @@ import com.ssh.batch.model.SshParamsInput;
 import com.ssh.batch.model.SshResult;
 import com.ssh.batch.partitioner.ImportBatchFilePartitioner;
 import com.ssh.batch.processor.SshItemProcessor;
+import com.ssh.services.SshInterface;
 
 
 
@@ -74,6 +75,10 @@ public class SSH {
 
 	@Autowired
 	private BatchAppProperties batchProp;
+	
+	@Autowired
+	SshInterface jshAdapterTemplate;
+	
 	
 //	@Autowired
 //	public void setBatchProp(BatchAppProperties batchProp) {
@@ -117,9 +122,11 @@ public class SSH {
 				.get("partitionStep")
 				.partitioner("slaveStep", partitioner())
 				.step(sshConnectionStep())
-		         .taskExecutor(asyncJobPartTaskExecutor())
+		         .taskExecutor(jobTaskExecutor())
+		         
 //		         .taskExecutor(threadpooltaskExecutor())
 				.gridSize(batchProp.gridSize)
+				
 				.build();
 	}
 	
@@ -131,43 +138,37 @@ public class SSH {
 		return partitioner;
 	}
 	
-//	@Bean
-//	public ThreadPoolTaskExecutor threadpooltaskExecutor() {
-//		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-//		taskExecutor.setMaxPoolSize(batchProp.threadPoolSize);
-//		//taskExecutor.setCorePoolSize(maxPoolSize);
-//		//taskExecutor.setQueueCapacity(maxPoolSize);
-//		taskExecutor.setThreadNamePrefix("SSHIMP-");
-//		taskExecutor.afterPropertiesSet();
-//		return taskExecutor;
-//	}
 	
 	@Bean
-	public TaskExecutor asyncJobPartTaskExecutor() {
-		SimpleAsyncTaskExecutor asyncJobPartTaskExecutor = new SimpleAsyncTaskExecutor("SSH-JOB-IMP-");
-		asyncJobPartTaskExecutor.setConcurrencyLimit(batchProp.jobThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
-		return asyncJobPartTaskExecutor;
+	public TaskExecutor jobTaskExecutor() {
+		SimpleAsyncTaskExecutor jobTaskExecutor = new SimpleAsyncTaskExecutor("SSH-JOB-IMP-");
+		jobTaskExecutor.setConcurrencyLimit(batchProp.jobThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+		return jobTaskExecutor;
+		
+//	    ThreadPoolTaskExecutor jobExecutor = new ThreadPoolTaskExecutor();
+//	    jobExecutor.setThreadNamePrefix("SSH-JOB-IMP-");
+//	    jobExecutor.setMaxPoolSize(batchProp.jobThreadPoolSize);
+//	    jobExecutor.setCorePoolSize(batchProp.jobThreadPoolSize);
+//		return jobExecutor;
 	}
 	
 	
 	@Bean
-	public TaskExecutor asyncStepTaskExecutor() {
-		SimpleAsyncTaskExecutor asyncStepTaskExecutor = new SimpleAsyncTaskExecutor("SSH-STEP-IMP-");
-		asyncStepTaskExecutor.setConcurrencyLimit(batchProp.stepThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
-		return asyncStepTaskExecutor;
-	}
+	public TaskExecutor stepTaskExecutor() {
+		SimpleAsyncTaskExecutor stepTaskExecutor = new SimpleAsyncTaskExecutor("SSH-STEP-IMP-");
+		stepTaskExecutor.setConcurrencyLimit(batchProp.stepThreadPoolSize); // asyncTaskExecutor.setThreadNamePrefix("CSVtoDB");
+
+		return stepTaskExecutor;
+		
+//	    ThreadPoolTaskExecutor stepExecutor = new ThreadPoolTaskExecutor();
+//	    stepExecutor.setThreadNamePrefix("SSH-STEP-IMP-");
+//	    stepExecutor.setMaxPoolSize(batchProp.stepThreadPoolSize);
+//	    stepExecutor.setCorePoolSize(batchProp.stepThreadPoolSize);
+//
+//		return stepExecutor;	
+		}
 	
-//	@Bean
-//	public TaskExecutor taskExecutor() {
-//		log.info("TaskExecutor.batchProp:{}",batchProp);
-//		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-//		taskExecutor.setMaxPoolSize(batchProp.threadPoolSize);
-//		taskExecutor.setCorePoolSize(batchProp.threadPoolSize);
-//		taskExecutor.setQueueCapacity(batchProp.threadPoolSize);
-//		taskExecutor.setThreadNamePrefix("SSHIMP-");
-//		taskExecutor.afterPropertiesSet();
-//		return taskExecutor;
-//	}
+
 
 	public Job sshConnectionJob() {
 		// TODO Auto-generated method stub
@@ -187,7 +188,8 @@ public class SSH {
 				.reader(sshParamsInputReader(null))
 				.processor(sshParamsInputProcessor())
 				.writer(sshResultWriter(null))
-				.taskExecutor(asyncStepTaskExecutor())
+				.taskExecutor(stepTaskExecutor())
+				.throttleLimit(batchProp.stepThreadPoolSize)
 				.build()
 				;
 	}
@@ -283,6 +285,7 @@ public class SSH {
 		SshItemProcessor processor = new SshItemProcessor();
 		processor.setNewLineDelimiter(batchProp.newLineDelimiter);
 		processor.setTimeout(batchProp.sshTimeout);
+		processor.setSshInterface(jshAdapterTemplate);
 		// TODO Auto-generated method stub
 		return processor;
 	}
